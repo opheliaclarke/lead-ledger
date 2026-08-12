@@ -1,12 +1,57 @@
 # lead-ledger-bob-olivia — Bob ↔ Olivia daily lead settlement
 
-**Status: DELIVERED 2026-08-12.** Page LIVE, workbook downloadable and byte-verified off the live URL.
-**Awaiting Bob on 4 assumptions** (all four are rate cells or one-line changes — nothing is blocked).
+**Status: DELIVERED 2026-08-12.** ⭐ **Bob's follow-up the same day: "put it on a git so an excel is
+not needed" → the LIVE WEB LEDGER is now the product**, the workbook is the fallback.
+**Awaiting Bob on 4 assumptions** (all four are rate fields or one-line changes — nothing is blocked).
 
-**Deliverable:** https://opheliaclarke.github.io/lead-ledger/ (noindex + robots disallow; public repo
-because Pages needs it on the free plan — same posture as `lead-split`, flagged because it holds
-partner financials). Repo `opheliaclarke/lead-ledger`.
-**File:** `lead-ledger-bob-olivia.xlsx` — 5 tabs, 300 pre-formulated rows.
+**Deliverable:** https://opheliaclarke.github.io/lead-ledger/ = **the app** (noindex + robots
+disallow; public repo because Pages needs it on the free plan — same posture as `lead-split`,
+flagged because it holds partner financials). Repo `opheliaclarke/lead-ledger`.
+`/about.html` = the written explanation (this was `index.html` until the app replaced it).
+`lead-ledger-bob-olivia.xlsx` = the same model as a file, 5 tabs, 300 pre-formulated rows.
+
+## ⭐ THE WEB LEDGER (index.html) — one file, no build, no server, no dependencies
+
+Four views (`#daily` `#summary` `#rates` `#guide`, hash-routed). Type date + six lead counts, the NET
+lands in the last column. Saves to **`localStorage` key `leadLedger.v1`** on every keystroke.
+Top bar always shows all-time outstanding. CSV export, JSON backup/restore, wipe (auto-downloads a
+backup first), "load three example days".
+
+⭐ **Money is exact integer arithmetic, not floats** — everything converts to **1/10000 units**
+(`toU`), so `(b+c)*price` is an integer product and nothing drifts. This is *better* than the
+workbook, which relies on `ROUND(...,6)` guards.
+⭐ **Per-day price override kept from the sheet**: prices default from Rates, and the per-day columns
+are behind a toggle (default off) so the table stays readable. An overridden price is highlighted.
+⭐ **Responsive by card-flip**: `table.resp` becomes labelled cards under 980px via `td::before{
+content:attr(data-l)}` — one markup, two layouts, no duplicate render path.
+⚠ **Only wrappers holding a `.resp` table may drop their scroll box on mobile** (`.tw-resp`). My
+first version killed `overflow-x` on *every* `.tw`, which made the guide's plain table push the page
+sideways (464 > 390). Caught by the automated overflow check, not by eye.
+⚠ **The blank starter row is not data.** `loadEx` filters with `isEmptyDay()` before asking to
+confirm — otherwise a fresh ledger asks "add to the 1 already here?" about an empty placeholder.
+
+🛑 **The one real limit, stated on the Rates view: it is one browser.** Not shared with Olivia, gone
+if browser data is cleared. Backup/restore is the mitigation. **If Bob wants both of them typing into
+one live ledger that is a CF Worker + D1** (we have the pattern: `ai-visibility-collect`, `deploy-bot`,
+`fleetview` on the Osanix account) — offered, not built.
+
+## Verification of the app — `verify_app.py`, 163 checks against the LIVE URL
+
+Drives the deployed page with Playwright and compares **every displayed number against the same
+exact-`Fraction` model that validated the workbook**, so app and spreadsheet are proved to agree.
+Covers: the UI typing path (3 days typed into real inputs), the engine over **40 seeded days**
+(9 deliberate edge fixtures + randomised) checking net/L/M per row + 4 summary figures + 7 lane
+totals, the date window filtering **days and payments**, persistence across reload, JSON
+backup→wipe→restore, CSV shape, and a render pass (4 views × desktop+mobile: overflow, contrast,
+console errors). All green.
+⚠ **patchright evaluates in an ISOLATED world** — `window.LEDGER` set by page script reads as
+`undefined`, while DOM queries and `localStorage` work fine. Don't debug page globals with it.
+⚠ **Wait for `#v-<view>.on` after a nav click.** Reading a summary cell straight after the click
+returns the *boot-time* value — my first run reported `0.00` vs `158.00` and it was a test race, not
+a bug. It only showed up in the typing test because the seeded tests reload (so boot values are
+already correct) — a race that hides itself in 4 of 5 tests.
+⚠ **Read a downloaded CSV with `newline=""`** or Python's universal newlines eat the `\r\n` and a
+CRLF assertion silently reads one line.
 
 ⚠ **This is NOT lead-split.** `lead-split` is Tyson & Berry, a **50/50 partnership**
 (`settlement = share of net − collected + paid`, zero-sum). This is Bob & Olivia, a **buy/sell chain**
@@ -111,7 +156,9 @@ campaign or from S ("cost from Bob to Olivia is also same always").
 
 ## Files
 
-`build_sheet.py` (generator, the single source of the workbook) · `verify.py` · `verify_checks_fire.py`
-· `index.html` · `qa-desktop.png` / `qa-mobile.png` · `lead-ledger-bob-olivia.xlsx`.
+`index.html` (**the app**) · `about.html` (the write-up) · `build_sheet.py` (generator, the single
+source of the workbook) · `verify.py` · `verify_checks_fire.py` · `verify_app.py` (live-page tests) ·
+`lead-ledger-bob-olivia.xlsx` · screenshots `app-daily/-summary/-mobile-daily/-desktop/-mobile.png`,
+`qa-desktop.png` / `qa-mobile.png`.
 Page QA: 0 contrast failures (runtime walker compositing alpha), 0 console errors, no horizontal
 overflow desktop + mobile. Live download md5 `eb70e420a4b8c297f0c47e646e4f0378` == local.
