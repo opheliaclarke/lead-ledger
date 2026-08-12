@@ -876,8 +876,15 @@ el('wipe').addEventListener('click', function(){
   if(!confirm('Backup downloaded. Delete everything now?')) return;
   S.days=[]; S.payments=[]; save(); renderDaily(); renderSummary(); toast('Ledger emptied.');
 });
+function isEmptyDay(d){
+  return !cnt(d.b)&&!cnt(d.c)&&!cnt(d.d)&&!cnt(d.e)&&!cnt(d.f)&&!cnt(d.g)&&
+         (d.amt===''||d.amt==null);
+}
 el('loadEx').addEventListener('click', function(){
-  if(S.days.length && !confirm('Add three example days to the '+S.days.length+' already here?')) return;
+  // the blank starter row is not "data" — don't make him confirm against it
+  var real = S.days.filter(function(d){ return !isEmptyDay(d); });
+  if(real.length && !confirm('Add three example days to the '+real.length+' already here?')) return;
+  S.days = real;
   S.rates.pbo=8; S.rates.pgsx=6; S.rates.ppanel=0; S.rates.gscost=6;
   [['2026-08-10',40,0,25,10,0,12,'','Bob','NO'],
    ['2026-08-11',0,35,18,0,8,20,'30','Bob','YES'],
