@@ -57,7 +57,7 @@ async def sign_in(page, code, expect_name):
     await page.wait_for_selector("#gate:not([hidden])", timeout=15000)
     await page.fill("#gateCode", code)
     await page.click("#gateGo")
-    await page.wait_for_selector("#gate[hidden]", timeout=20000)
+    await page.wait_for_selector("#gate", state="hidden", timeout=20000)
     check(f"sign-in as {expect_name} — name in top bar",
           (await page.text_content("#whoAmI")).strip(), expect_name)
 
@@ -87,6 +87,16 @@ async def goview(page, v):
 
 async def txt(page, sel):
     return (await page.text_content(sel)).strip()
+
+
+def api_curl(path, code, body):
+    """Cloudflare 403s python-urllib; curl gets through."""
+    r = subprocess.run(["curl", "-s", "-X", "POST", API + path,
+                        "-H", f"Authorization: Bearer {code}",
+                        "-H", "Content-Type: application/json",
+                        "--data-binary", json.dumps(body)],
+                       capture_output=True, text=True, timeout=60)
+    return r.stdout
 
 
 async def main():
@@ -155,19 +165,12 @@ async def main():
         print("  Olivia logged a 100.00 payment; Bob's tab updated to +58.00 on its own")
 
         # ---- 5. conflict: the server moves while Bob is mid-edit -----------
-        import urllib.request
-        cur = json.loads(urllib.request.urlopen(urllib.request.Request(
-            API + "/api/load", data=b"{}",
-            headers={"Authorization": f"Bearer {oli_code}",
-                     "Content-Type": "application/json"})).read())
+        # NB: curl, not urllib — Cloudflare 403s python-urllib's user agent.
+        cur = json.loads(api_curl("/api/load", oli_code, {}))
         state = cur["state"]
         state["days"][0]["b"] = "41"          # Olivia changes a lead count behind Bob's back
-        urllib.request.urlopen(urllib.request.Request(
-            API + "/api/save",
-            data=json.dumps({"state": state, "baseRev": cur["rev"],
-                             "meta": {"days": 3, "payments": 1, "net": "+66.00"}}).encode(),
-            headers={"Authorization": f"Bearer {oli_code}",
-                     "Content-Type": "application/json"})).read()
+        api_curl("/api/save", oli_code, {"state": state, "baseRev": cur["rev"],
+                                         "meta": {"days": 3, "payments": 1, "net": "+66.00"}})
 
         await goview(bob, "daily")
         await bob.locator("#daysBody tr").first.locator("[data-k='c']").fill("7")
@@ -179,7 +182,7 @@ async def main():
 
         # Bob takes their version
         await bob.click("#cfTheirs")
-        await bob.wait_for_selector("#conflict[hidden]", timeout=15000)
+        await bob.wait_for_selector("#conflict", state="hidden", timeout=15000)
         b0 = await bob.locator("#daysBody tr").first.locator("[data-k='b']").input_value()
         c0 = await bob.locator("#daysBody tr").first.locator("[data-k='c']").input_value()
         check("conflict — took Olivia's 41", b0, "41")
@@ -192,9 +195,12 @@ async def main():
             "() => document.querySelectorAll('#histBody tr').length > 1", timeout=25000)
         rows = await bob.eval_on_selector_all(
             "#histBody tr", "e => e.map(r => r.children[1].textContent.trim())")
-        check("history — has several versions", len(rows) >= 4, True)
+        check("history — one version per real save", len(rows), 3)
         check("history — records both names", set(rows) >= {"Bob", "Olivia"}, True)
         print(f"  backup list: {len(rows)} versions, saved by {sorted(set(rows))}")
+        n_versions = len(rows)
+        oldest_net = await bob.eval_on_selector(
+            "#histBody tr:last-child td:nth-child(5)", "e => e.textContent.trim()")
 
         # restore the oldest listed version (the 3-day, no-payment one)
         n_before = await txt(bob, "#topBal")
@@ -206,14 +212,22 @@ async def main():
         check("restore — back to the first saved version", after, "+158.00")
         print(f"  restored the oldest version: outstanding went {n_before} -> {after}")
 
-        # and the restore is itself just another version, so it can be undone
+        # the restore is itself just another version, so it can be undone —
+        # and it must add exactly ONE, or something is saving on its own
         await goview(bob, "backup")
-        await bob.wait_for_function(
-            "() => document.querySelectorAll('#histBody tr').length > 4", timeout=25000)
-        top_who = await bob.eval_on_selector("#histBody tr:first-child td:nth-child(2)",
+        await bob.wait_for_timeout(1200)
+        await bob.click("#histRefresh")
+        await bob.wait_for_timeout(1800)
+        rows2 = await bob.eval_on_selector_all(
+            "#histBody tr", "e => e.map(r => r.children[1].textContent.trim())")
+        check("restore — adds exactly one version, nothing saves by itself",
+              len(rows2), n_versions + 1)
+        check("restore — logged as its own version", "restored" in rows2[0], True)
+        top_net = await bob.eval_on_selector("#histBody tr:first-child td:nth-child(5)",
                                              "e => e.textContent.trim()")
-        check("restore — logged as its own version", "restored" in top_who, True)
-        print(f"  the restore itself is version {top_who!r} — undoable")
+        check("restore — labelled with the balance it restored, not the one it replaced",
+              top_net, oldest_net)
+        print(f"  the restore is version {rows2[0]!r} labelled {top_net} — undoable")
 
         # ---- 7. Olivia sees the restore ------------------------------------
         await force_poll(oli)

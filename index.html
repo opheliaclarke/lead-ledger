@@ -600,7 +600,8 @@ function saveLocal(){
   try{ localStorage.setItem(KEY, JSON.stringify(S)); }
   catch(e){ storageOk=false; }
 }
-function save(){ saveLocal(); queueSave(); }
+var applying=false;   // true while a server version is being painted in
+function save(){ if(applying) return; saveLocal(); queueSave(); }
 function uid(){ return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function el(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){
@@ -1078,9 +1079,11 @@ function pushNow(force){
 
 /* ---- pulling ---- */
 function adopt(d, quiet){
+  applying=true;
   S=normalise(d.state||{}); rev=d.rev; lsSet(REV_KEY,String(rev));
   dirty=false; conflictState=null; el('conflict').hidden=true;
   saveLocal(); ensureStarter(); renderAll();
+  setTimeout(function(){ applying=false; }, 0);
   setSync('ok', quiet ? 'saved '+shortTime(d.updated_at)
                       : 'updated by '+(d.updated_by||'them'),
           'Version '+rev+', saved by '+(d.updated_by||'?'));
@@ -1222,7 +1225,7 @@ el('histBody').addEventListener('click', function(ev){
   var b=ev.target.closest('[data-restore]'); if(!b) return;
   if(!confirm('Put the whole ledger back to this version?\n\n'+
               'What you have now is kept in the list, so this can be undone.')) return;
-  apiCall('/api/restore', {id:Number(b.dataset.restore), net:fmtSigned(allTimeOutstanding())})
+  apiCall('/api/restore', {id:Number(b.dataset.restore)})
     .then(function(r){
       if(r.status===200){ adopt(r.data, true); renderBackup(); toast('Ledger put back to that version.'); }
       else alert('Could not put it back: '+((r.data&&r.data.error)||('error '+r.status)));

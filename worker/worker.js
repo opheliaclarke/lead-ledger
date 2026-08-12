@@ -142,13 +142,14 @@ export default {
       if (path === "/api/restore") {
         const id = Number(body.id);
         if (!Number.isFinite(id)) return json({ error: "which version?" }, 400, origin);
-        const snap = await env.DB.prepare("SELECT json FROM snapshots WHERE id = ?")
-          .bind(id).first();
+        const snap = await env.DB.prepare(
+          "SELECT json, days, payments, net FROM snapshots WHERE id = ?").bind(id).first();
         if (!snap) return json({ error: "that version is gone" }, 404, origin);
         const st = JSON.parse(snap.json);
+        // the restored bytes are identical to the snapshot, so carry its own summary across.
+        // (Taking the figure from the client labelled the restore with the balance it replaced.)
         const out = await writeState(env, snap.json, who + " (restored #" + id + ")", {
-          days: (st.days || []).length, payments: (st.payments || []).length,
-          net: body.net || "restored",
+          days: snap.days, payments: snap.payments, net: snap.net,
         });
         return json({ ok: true, state: st, ...out }, 200, origin);
       }
