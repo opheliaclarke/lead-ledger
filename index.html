@@ -1058,6 +1058,7 @@ function scheduleRetry(){
 }
 function pushNow(force){
   if(!code) return;
+  if(!dirty && !force) return;          // nothing of ours to send
   if(saving){ clearTimeout(saveTimer); saveTimer=setTimeout(function(){ pushNow(force); },600); return; }
   saving=true; setSync('busy','saving…');
   var body = force ? {state:S, meta:meta()} : {state:S, baseRev:rev, meta:meta()};
@@ -1084,6 +1085,9 @@ function pushNow(force){
 /* ---- pulling ---- */
 function adopt(d, quiet){
   applying=true;
+  // a save queued just before this (clicking a button blurs the field being typed in,
+  // which fires `change`) must not fire afterwards — it would re-upload what we just took
+  clearTimeout(saveTimer); clearTimeout(retryTimer);
   // blur first, inside the guard: removing a focused, edited input fires `change`
   // afterwards, which would write the discarded value back and save it as a new version
   try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
@@ -1190,7 +1194,7 @@ function afterConnect(d){
     if(localHas && !same){ conflictState=d; showConflict(d); setSync('bad','not saved'); renderAll(); }
     else adopt(d, true);
   } else if(localHas){
-    setSync('busy','saving…'); pushNow(false);
+    dirty=true; setSync('busy','saving…'); pushNow(false);
   } else {
     ensureStarter(); renderAll(); setSync('ok','ready — nothing saved yet');
   }
