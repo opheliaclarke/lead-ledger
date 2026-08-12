@@ -148,7 +148,7 @@ td.net.zero{background:var(--neu-bg);color:var(--ink-3)}
 .lanes td:last-child{font-weight:700}
 .lanes tr.b td:last-child{background:var(--bob-bg);color:var(--bob)}
 .lanes tr.o td:last-child{background:var(--oli-bg);color:var(--oli)}
-.lanes tr.n td:last-child{background:var(--neu-bg);color:var(--ink-3);font-weight:400}
+.lanes tr.n td:last-child{background:var(--neu-bg);color:var(--ink-2);font-weight:400}
 .rule{background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:20px 22px;margin:18px 0}
 .rule .eq{font-size:clamp(16px,2.4vw,21px);font-weight:800;line-height:1.5}
 .rule .eq .p{color:var(--bob)} .rule .eq .m{color:var(--oli)}
@@ -168,7 +168,7 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
 
 /* ---------- mobile: table becomes cards ---------- */
 @media (max-width:980px){
-  .tw{border:0;background:none;overflow:visible}
+  .tw-resp{border:0;background:none;overflow:visible}
   table.resp,table.resp tbody,table.resp tr,table.resp td{display:block;width:100%}
   table.resp thead{display:none}
   table.resp tr{background:var(--card);border:1px solid var(--line);border-radius:10px;
@@ -224,7 +224,7 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
 
   <div id="flagsDaily" class="flags"></div>
 
-  <div class="tw">
+  <div class="tw tw-resp">
     <table class="resp" id="tblDaily">
       <thead>
         <tr class="grp">
@@ -309,7 +309,7 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
     <h2>Money already transferred</h2>
     <p class="hint">Log every payment here. Without it the ledger keeps asking for money that has
       already moved.</p>
-    <div class="tw" style="border:0">
+    <div class="tw tw-resp" style="border:0">
       <table class="resp" id="tblPay">
         <thead><tr><th>Date</th><th>Paid by</th><th class="n">Amount</th><th>Note</th><th></th></tr></thead>
         <tbody id="payBody"></tbody>
