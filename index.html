@@ -183,6 +183,7 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
   table.resp td.net{font-size:20px;padding:13px}
   table.resp tfoot{display:block}
   table.resp tfoot td{display:flex;justify-content:space-between}
+  table.resp tfoot td:empty{display:none}   /* colspan spacers become blank bars in card mode */
   .field{grid-template-columns:1fr 108px}
 }
 </style>
