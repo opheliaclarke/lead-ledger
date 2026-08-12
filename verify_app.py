@@ -11,8 +11,9 @@ wipe -> restore, and a render pass (console errors, contrast, horizontal overflo
 """
 import asyncio
 import json
+import os
 import random
-import re
+import subprocess
 import sys
 from fractions import Fraction as Fr
 
@@ -22,7 +23,46 @@ except ImportError:
     from playwright.async_api import async_playwright
 
 URL = "https://opheliaclarke.github.io/lead-ledger/"
+API = "https://lead-ledger.fleet-fefsba.workers.dev"
+CODE = json.load(open("/root/.config/lead-ledger/access.json"))["codes"]["Bob"]
+WORKER_DIR = "/root/workspace/lead-ledger-bob-olivia/worker"
 FAILS = []
+
+
+def api_curl(path, body):
+    """Cloudflare 403s python-urllib; curl gets through."""
+    r = subprocess.run(["curl", "-s", "-X", "POST", API + path,
+                        "-H", f"Authorization: Bearer {CODE}",
+                        "-H", "Content-Type: application/json",
+                        "--data-binary", json.dumps(body)],
+                       capture_output=True, text=True, timeout=60)
+    return r.stdout
+
+
+def wipe_server():
+    cf = json.load(open("/root/.config/cloudflare/osanix-fleetview.json"))
+    env = {**os.environ, "CLOUDFLARE_API_KEY": cf["api_key"],
+           "CLOUDFLARE_EMAIL": cf["email"], "CLOUDFLARE_ACCOUNT_ID": cf["account_id"]}
+    for sql in ["DELETE FROM state", "DELETE FROM snapshots"]:
+        subprocess.run(["npx", "wrangler", "d1", "execute", "lead_ledger", "--remote",
+                        "--config", "./wrangler.json", "--command", sql],
+                       cwd=WORKER_DIR, env=env, capture_output=True, timeout=180)
+
+
+async def sign_in(page):
+    await page.goto(URL, wait_until="networkidle")
+    try:
+        await page.wait_for_selector("#gate:not([hidden])", timeout=8000)
+    except Exception:
+        return                     # already signed in on this context
+    await page.fill("#gateCode", CODE)
+    await page.click("#gateGo")
+    await page.wait_for_selector("#gate", state="hidden", timeout=25000)
+
+
+async def wait_saved(page, timeout=25000):
+    await page.wait_for_function(
+        "() => /^saved/.test(document.getElementById('syncTxt').textContent)", timeout=timeout)
 
 
 def fail(msg):
@@ -76,8 +116,18 @@ async def seed(page, rates, days, payments=None, win=None):
         "win": win or {"from": "", "to": ""},
         "showPrices": False,
     }
-    await page.evaluate("s => localStorage.setItem('leadLedger.v1', JSON.stringify(s))", state)
+    cur = json.loads(api_curl("/api/load", {}) or "{}")
+    api_curl("/api/save", {"state": state, "baseRev": cur.get("rev", 0),
+                           "meta": {"days": len(state["days"]),
+                                    "payments": len(state["payments"]), "net": "seed"}})
+    # drop the local copy so the page adopts the server version instead of flagging a
+    # conflict between the two (which is the correct behaviour when both have data)
+    await page.evaluate("localStorage.removeItem('leadLedger.v1');"
+                        "localStorage.removeItem('leadLedger.rev')")
     await page.reload(wait_until="networkidle")
+    await page.wait_for_function(
+        "n => document.querySelectorAll('#daysBody tr').length === n",
+        arg=len(state["days"]), timeout=25000)
 
 
 async def row_nets(page):
@@ -105,9 +155,10 @@ async def goview(page, v):
 # ---------------------------------------------------------------- tests
 async def t_ui_typing(page):
     """Type into the real inputs and read the answer back."""
+    wipe_server()
     await page.goto(URL, wait_until="networkidle")
     await page.evaluate("localStorage.clear()")
-    await page.reload(wait_until="networkidle")
+    await sign_in(page)
 
     # set the rates through the UI
     await goview(page, "rates")
@@ -146,6 +197,7 @@ async def t_ui_typing(page):
     total = sum(model_day(c, 8, 6, 0, a or None, b, s)["net"] for c, a, b, s in cases)
     check("UI typing — period net", await txt(page, "#sNet"), signed(total))
     check("UI typing — answer", await txt(page, "#ansBig"), money(total))
+    await wait_saved(page)
     print(f"  UI typing path: 3 days entered by hand -> "
           f"{', '.join(nets)}  period {signed(total)}")
     return len(cases) * 2 + 2
@@ -254,18 +306,17 @@ async def t_persist(page):
 
 
 async def t_backup(page, tmp):
-    """Export a backup, wipe the ledger, restore it."""
+    """Export a backup and a CSV, change the ledger, then restore from the file."""
     before_top = await txt(page, "#topBal")
     n_before = len(await row_nets(page))
 
-    await goview(page, "rates")
+    await goview(page, "backup")
     async with page.expect_download() as dl:
         await page.click("#expJson")
     path = await (await dl.value).path()
     blob = json.load(open(path))
     check("backup — day count in file", len(blob["data"]["days"]), n_before)
 
-    # CSV too
     async with page.expect_download() as dl2:
         await page.click("#expCsv")
     csv = open(await (await dl2.value).path(), newline="").read()
@@ -276,19 +327,22 @@ async def t_backup(page, tmp):
     body = lines[1:lines.index("")] if "" in lines else lines[1:]
     check("backup — CSV data rows", len(body), n_before)
 
-    # wipe, then restore
-    await page.evaluate("localStorage.setItem('leadLedger.v1', JSON.stringify("
-                        "{rates:{pbo:8,pgsx:6,ppanel:0,bobcost:0,scost:0,gscost:6,gluprice:0},"
-                        "days:[],payments:[],win:{from:'',to:''},showPrices:false}))")
-    await page.reload(wait_until="networkidle")
-    await goview(page, "rates")
+    # change the ledger, then put the file back
+    await goview(page, "daily")
+    await page.locator("#daysBody tr").first.locator("[data-k='b']").fill("777")
+    await page.wait_for_timeout(400)
+    changed = await txt(page, "#topBal")
+    check("backup — the ledger really changed", changed != before_top, True)
+    await wait_saved(page)
+
+    await goview(page, "backup")
     await page.set_input_files("#impFile", path)
-    await page.wait_for_timeout(700)
-    await goview(page, "summary")
-    check("restore — outstanding back to what it was", await txt(page, "#topBal"), before_top)
-    check("restore — day count back", len(await row_nets(page)), n_before)
+    await page.wait_for_timeout(900)
+    await goview(page, "daily")
+    check("restore from file — balance back to what it was", await txt(page, "#topBal"), before_top)
+    check("restore from file — day count back", len(await row_nets(page)), n_before)
     print(f"  backup: JSON round-trip restored {n_before} days, CSV has 19 columns")
-    return 6
+    return 8
 
 
 async def t_render(page, ctx):
@@ -297,9 +351,9 @@ async def t_render(page, ctx):
         p = await ctx.new_page()
         p.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
         p.on("pageerror", lambda e: errs.append(str(e)))
-        await p.goto(URL, wait_until="networkidle")
+        await sign_in(p)
         await p.set_viewport_size({"width": w, "height": h})
-        for view in ["daily", "summary", "rates", "guide"]:
+        for view in ["daily", "summary", "rates", "backup", "guide"]:
             await goview(p, view)
             ow = await p.evaluate("document.documentElement.scrollWidth")
             iw = await p.evaluate("window.innerWidth")
@@ -310,7 +364,7 @@ async def t_render(page, ctx):
             fail(f"render — {len(bad)} contrast failures on {name}: {bad[:4]}")
         await p.screenshot(path=f"app-{name}.png", full_page=(name == "desktop"))
         await p.close()
-        print(f"  render {name}: 4 views, no overflow, {len(bad)} contrast failures")
+        print(f"  render {name}: 5 views, no overflow, {len(bad)} contrast failures")
     if errs:
         fail(f"render — console errors: {errs[:5]}")
     return 9
