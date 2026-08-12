@@ -43,6 +43,38 @@ nav a[aria-current="page"]{background:#fff;color:var(--ink)}
 .balance .val{font-size:19px;font-weight:800}
 .balance .val.pos{color:#7fe0a4} .balance .val.neg{color:#ffb3a7} .balance .val.zero{color:#c8d2dc}
 .saved{font-size:13px;color:#9fb0c0;white-space:nowrap}
+.sync{display:flex;align-items:center;gap:7px;font-size:13px;color:#c8d2dc;white-space:nowrap}
+.sync .dot{width:9px;height:9px;border-radius:50%;background:#8d99a6;flex:0 0 auto}
+.sync.ok .dot{background:#5fe08f} .sync.busy .dot{background:#f4c95d}
+.sync.off .dot{background:#ffa657} .sync.bad .dot{background:#ff8f83}
+.sync .who{background:rgba(255,255,255,.16);padding:2px 9px;border-radius:20px;font-weight:700;color:#fff}
+
+/* sign-in gate */
+.gate{position:fixed;inset:0;background:rgba(15,20,26,.96);z-index:100;display:grid;
+  place-items:center;padding:22px}
+.gate-box{background:var(--card);border-radius:14px;padding:30px 32px;max-width:460px;width:100%;
+  box-shadow:0 22px 60px rgba(0,0,0,.4)}
+.gate-box h2{margin:0 0 6px;font-size:23px}
+.gate-box p{margin:0 0 18px;color:var(--ink-2);font-size:16px}
+.gate-box input{font-size:19px;text-align:center;letter-spacing:.04em;min-height:52px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.gate-box .btn{width:100%;justify-content:center;margin-top:14px}
+.gate-err{color:var(--oli);background:var(--oli-bg);border-radius:8px;padding:10px 14px;
+  margin-top:14px;font-size:15.5px;font-weight:700}
+.gate-alt{margin-top:16px;text-align:center;font-size:15px}
+.gate-alt button{background:none;border:0;color:var(--focus);cursor:pointer;
+  text-decoration:underline;font-size:15px;padding:8px}
+
+/* conflict banner */
+.conflict{background:var(--oli-bg);border:2px solid var(--oli-br);border-radius:10px;
+  padding:16px 20px;margin:0 0 18px}
+.conflict h3{margin:0 0 4px;font-size:18px;color:var(--oli)}
+.conflict p{margin:0 0 12px;font-size:16px;color:var(--ink);max-width:80ch}
+.conflict .bar{margin:0}
+
+/* version history */
+.hist td{font-size:15px}
+.hist tr.cur td{background:var(--bob-bg);font-weight:700}
 
 /* ---------- layout ---------- */
 .wrap{max-width:1500px;margin:0 auto;padding:26px 18px 110px}
@@ -196,7 +228,8 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
     <nav>
       <a href="#daily" data-v="daily">Daily</a>
       <a href="#summary" data-v="summary">Summary</a>
-      <a href="#rates" data-v="rates">Rates &amp; data</a>
+      <a href="#rates" data-v="rates">Rates</a>
+      <a href="#backup" data-v="backup">Backup</a>
       <a href="#guide" data-v="guide">How it works</a>
     </nav>
     <div class="top-right">
@@ -204,12 +237,43 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
         <div class="lbl">Outstanding, all time</div>
         <div class="val zero" id="topBal">0.00</div>
       </div>
-      <div class="saved" id="saved">saved</div>
+      <div class="sync" id="sync" title="">
+        <span class="dot" id="syncDot"></span>
+        <span id="syncTxt">connecting…</span>
+        <span class="who" id="whoAmI"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-box">
+    <h2>Lead ledger</h2>
+    <p>Enter your access code. Bob and Olivia each have their own — it decides which
+      name goes against every change.</p>
+    <form id="gateForm">
+      <input type="text" id="gateCode" placeholder="bob-xxxxxxxxxx" autocomplete="off"
+             autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Access code">
+      <button class="btn" type="submit" id="gateGo">Open the ledger</button>
+    </form>
+    <div class="gate-err" id="gateErr" hidden></div>
+    <div class="gate-alt" id="gateAlt" hidden>
+      <button type="button" id="gateOffline">Work offline with the copy on this device</button>
     </div>
   </div>
 </div>
 
 <div class="wrap">
+
+<div class="conflict" id="conflict" hidden>
+  <h3>Two versions of the ledger</h3>
+  <p id="conflictTxt"></p>
+  <div class="bar">
+    <button class="btn alt sm" id="cfDownload">Download my version first</button>
+    <button class="btn alt sm" id="cfTheirs">Use their version, discard mine</button>
+    <button class="btn danger sm" id="cfMine">Overwrite with mine</button>
+  </div>
+</div>
 
 <!-- ============================ DAILY ============================ -->
 <section class="view" id="v-daily">
@@ -374,25 +438,55 @@ footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);
     </div>
   </div>
 
+  <div class="note">Everything you type is saved on the server straight away and every previous
+    version is kept. See <a href="#backup">Backup</a> for the history and for downloads.</div>
+
+</section>
+
+<!-- ============================ BACKUP ============================ -->
+<section class="view" id="v-backup">
+  <div class="head"><h1>Backup</h1><p>Nothing is ever lost. Every save keeps the version before it.</p></div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">Saved on the server</div><div class="v" id="bkWhen" style="font-size:17px">—</div></div>
+    <div class="stat"><div class="k">Last changed by</div><div class="v" id="bkWho" style="font-size:17px">—</div></div>
+    <div class="stat"><div class="k">Versions kept</div><div class="v" id="bkCount">0</div></div>
+    <div class="stat"><div class="k">Signed in as</div><div class="v" id="bkMe" style="font-size:17px">—</div></div>
+  </div>
+
   <div class="panel">
-    <h2>Your data</h2>
-    <p class="hint">Everything lives in this browser and saves the moment you type. Export a copy to
-      keep it safe or to send it to someone.</p>
+    <h2>Take a copy</h2>
+    <p class="hint">The server holds the live ledger. These are for your own records, or to send
+      the numbers to somebody.</p>
     <div class="bar">
       <button class="btn alt" id="expCsv">Download CSV</button>
       <button class="btn alt" id="expJson">Download backup (JSON)</button>
-      <button class="btn alt" id="impBtn">Restore from backup</button>
+      <button class="btn alt" id="impBtn">Restore from a file</button>
       <input type="file" id="impFile" accept="application/json,.json" hidden>
       <a class="btn alt" href="lead-ledger-bob-olivia.xlsx" download>Excel version</a>
     </div>
-    <div class="note warn"><b>This is the one real limit.</b> The ledger is stored in this browser
-      only. It is not shared with Olivia, and clearing your browser data would take it with it.
-      Download a backup now and then. If you want both of you typing into the same live ledger,
-      say so — that's a shared database behind it, not a bigger page.</div>
+  </div>
+
+  <div class="panel">
+    <h2>Earlier versions</h2>
+    <p class="hint">The last 300 saves, newest first. Opening one puts the whole ledger back to how
+      it was at that moment — and that itself is saved as a new version, so you can undo the undo.</p>
+    <div class="tw" style="border:0">
+      <table class="hist">
+        <thead><tr><th>When</th><th>Saved by</th><th class="n">Days</th><th class="n">Payments</th>
+          <th class="n">Outstanding</th><th></th></tr></thead>
+        <tbody id="histBody"><tr><td colspan="6" style="padding:14px;color:var(--ink-3)">Loading…</td></tr></tbody>
+      </table>
+    </div>
     <div class="bar" style="margin-bottom:0">
-      <button class="btn danger sm" id="wipe">Delete everything and start again</button>
+      <button class="btn alt sm" id="histRefresh">Refresh the list</button>
+      <button class="btn danger sm" id="wipe">Empty the ledger</button>
+      <button class="btn alt sm" id="signOut">Sign out of this device</button>
     </div>
   </div>
+
+  <div class="note">Emptying the ledger is safe: the version before it stays in the list above,
+    so it can be put straight back.</div>
 </section>
 
 <!-- ============================ GUIDE ============================ -->
@@ -499,16 +593,11 @@ function normalise(o){
   d.showPrices = !!o.showPrices;
   return d;
 }
-function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify(S)); flashSaved(); }
-  catch(e){ storageOk=false; el('saved').textContent='NOT SAVING'; el('saved').style.color='#ffb3a7'; }
+function saveLocal(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch(e){ storageOk=false; }
 }
-var savedTimer;
-function flashSaved(){
-  var n=el('saved'); n.textContent='saving…';
-  clearTimeout(savedTimer);
-  savedTimer=setTimeout(function(){ n.textContent='saved'; },420);
-}
+function save(){ saveLocal(); queueSave(); }
 function uid(){ return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function el(id){ return document.getElementById(id); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){
@@ -562,7 +651,7 @@ function dirWords(u){
 }
 
 /* ================= routing ================= */
-var VIEWS=['daily','summary','rates','guide'];
+var VIEWS=['daily','summary','rates','backup','guide'];
 function show(v){
   if(VIEWS.indexOf(v)<0) v='daily';
   VIEWS.forEach(function(x){ el('v-'+x).classList.toggle('on', x===v); });
@@ -570,6 +659,7 @@ function show(v){
     if(a.dataset.v===v) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
   });
   if(v==='summary') renderSummary();
+  if(v==='backup') renderBackup();
   window.scrollTo(0,0);
 }
 window.addEventListener('hashchange', function(){ show(location.hash.slice(1)); });
@@ -898,6 +988,248 @@ el('loadEx').addEventListener('click', function(){
   toast('Three example days loaded — 248.00, 190.00 and −280.00.');
 });
 
+
+/* ================= server sync + backup ================= */
+var API='https://lead-ledger.fleet-fefsba.workers.dev';
+var CODE_KEY='leadLedger.code', REV_KEY='leadLedger.rev';
+var code=null, myName=null, rev=0, dirty=false, saving=false,
+    saveTimer=null, retryTimer=null, pollTimer=null, conflictState=null, offline=false;
+
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+function setSync(cls, txt, tip){
+  var n=el('sync'); if(!n) return;
+  n.className='sync '+(cls||''); n.title=tip||'';
+  el('syncTxt').textContent=txt;
+  el('whoAmI').textContent=myName||'';
+}
+function shortTime(iso){
+  if(!iso) return '';
+  try{ return new Date(iso).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+  catch(e){ return ''; }
+}
+function shortDateTime(iso){
+  if(!iso) return '—';
+  try{
+    return new Date(iso).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+shortTime(iso);
+  }catch(e){ return '—'; }
+}
+function apiCall(path, body){
+  return fetch(API+path, {method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+code},
+    body:JSON.stringify(body||{})
+  }).then(function(r){
+    return r.json().catch(function(){ return null; }).then(function(d){
+      return {status:r.status, data:d};
+    });
+  });
+}
+function renderAll(){ renderRates(); renderDaily(); renderSummary(); }
+function hasRealData(){
+  return S.payments.length>0 || S.days.some(function(d){ return !isEmptyDay(d); });
+}
+function ensureStarter(){
+  if(!S.days.length) S.days.push({id:uid(), date:iso(new Date()), b:'',c:'',d:'',e:'',f:'',g:'',
+                                  pbo:'',pgsx:'',ppanel:'', amt:'', by:'Bob', settle:'NO'});
+}
+function meta(){
+  return {days:S.days.length, payments:S.payments.length, net:fmtSigned(allTimeOutstanding())};
+}
+
+/* ---- saving ---- */
+function queueSave(){
+  if(!code){ setSync('off','offline — kept on this device only'); return; }
+  dirty=true; setSync('busy','not saved yet');
+  clearTimeout(saveTimer); saveTimer=setTimeout(function(){ pushNow(false); }, 1100);
+}
+function scheduleRetry(){
+  clearTimeout(retryTimer);
+  retryTimer=setTimeout(function(){ if(dirty) pushNow(false); }, 8000);
+}
+function pushNow(force){
+  if(!code) return;
+  if(saving){ clearTimeout(saveTimer); saveTimer=setTimeout(function(){ pushNow(force); },600); return; }
+  saving=true; setSync('busy','saving…');
+  var body = force ? {state:S, meta:meta()} : {state:S, baseRev:rev, meta:meta()};
+  apiCall('/api/save', body).then(function(r){
+    saving=false;
+    if(r.status===200){
+      rev=r.data.rev; lsSet(REV_KEY,String(rev)); dirty=false; offline=false;
+      conflictState=null; el('conflict').hidden=true;
+      setSync('ok','saved '+shortTime(r.data.updated_at),
+              'Saved on the server, version '+rev);
+      if(el('v-backup').classList.contains('on')) renderBackup();
+    } else if(r.status===409){
+      conflictState=r.data; showConflict(r.data); setSync('bad','not saved');
+    } else if(r.status===401){
+      setSync('bad','sign in again'); openGate('That access code no longer works.');
+    } else {
+      offline=true; setSync('off','could not save — retrying'); scheduleRetry();
+    }
+  }).catch(function(){
+    saving=false; offline=true; setSync('off','offline — retrying'); scheduleRetry();
+  });
+}
+
+/* ---- pulling ---- */
+function adopt(d, quiet){
+  S=normalise(d.state||{}); rev=d.rev; lsSet(REV_KEY,String(rev));
+  dirty=false; conflictState=null; el('conflict').hidden=true;
+  saveLocal(); ensureStarter(); renderAll();
+  setSync('ok', quiet ? 'saved '+shortTime(d.updated_at)
+                      : 'updated by '+(d.updated_by||'them'),
+          'Version '+rev+', saved by '+(d.updated_by||'?'));
+  if(!quiet) toast('The ledger was updated by '+(d.updated_by||'the other side')+'.');
+}
+function poll(){
+  if(!code || conflictState || saving) return;
+  if(document.visibilityState && document.visibilityState!=='visible') return;
+  apiCall('/api/load').then(function(r){
+    if(r.status!==200) return;
+    if(r.data.rev>rev){
+      if(dirty){ conflictState=r.data; showConflict(r.data); setSync('bad','not saved'); }
+      else adopt(r.data);
+    } else if(offline){ offline=false; setSync('ok','saved '+shortTime(r.data.updated_at)); }
+  }).catch(function(){});
+}
+function startPolling(){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(poll, 20000);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState==='visible') poll();
+  });
+}
+
+/* ---- conflict ---- */
+function showConflict(d){
+  el('conflictTxt').textContent =
+    (d.updated_by||'Someone')+' saved a change'+(d.updated_at?' at '+shortTime(d.updated_at):'')+
+    '. What is on this screen has not been saved, so there are two versions. '+
+    'Take a copy of yours first if you are not sure which is right.';
+  el('conflict').hidden=false;
+  window.scrollTo(0,0);
+}
+el('cfTheirs').addEventListener('click', function(){
+  if(!conflictState) return;
+  var d=conflictState; conflictState=null; adopt(d);
+  toast('Using their version.');
+});
+el('cfMine').addEventListener('click', function(){
+  if(!confirm('Overwrite the version on the server with what is on this screen?\n\n'+
+              'Their version stays in the Backup list, so it can be put back.')) return;
+  conflictState=null; el('conflict').hidden=true; pushNow(true);
+});
+el('cfDownload').addEventListener('click', function(){
+  dl('lead-ledger-my-version-'+iso(new Date())+'.json', backupJson(), 'application/json');
+});
+
+/* ---- the sign-in gate ---- */
+function openGate(msg){
+  el('gate').hidden=false;
+  el('gateErr').hidden=!msg; if(msg) el('gateErr').textContent=msg;
+  el('gateAlt').hidden = !lsGet(KEY);
+  setTimeout(function(){ try{ el('gateCode').focus(); }catch(e){} }, 60);
+}
+function closeGate(){ el('gate').hidden=true; }
+el('gateForm').addEventListener('submit', function(ev){
+  ev.preventDefault();
+  var c=el('gateCode').value.trim();
+  if(!c) return;
+  var btn=el('gateGo'); btn.disabled=true; btn.textContent='Checking…';
+  code=c;
+  apiCall('/api/load').then(function(r){
+    btn.disabled=false; btn.textContent='Open the ledger';
+    if(r.status!==200){
+      code=null;
+      el('gateErr').hidden=false;
+      el('gateErr').textContent = r.status===401
+        ? 'That code is not recognised. Check for a typo.'
+        : 'Something went wrong (error '+r.status+'). Try again in a moment.';
+      return;
+    }
+    lsSet(CODE_KEY,c); myName=r.data.name; closeGate(); afterConnect(r.data);
+  }).catch(function(){
+    code=null; btn.disabled=false; btn.textContent='Open the ledger';
+    el('gateErr').hidden=false;
+    el('gateErr').textContent='Could not reach the server. Check the internet connection.';
+  });
+});
+el('gateOffline').addEventListener('click', function(){
+  closeGate(); code=null; offline=true;
+  ensureStarter(); renderAll();
+  setSync('off','offline — kept on this device only');
+  toast('Working offline. Sign in later to save it to the server.');
+});
+el('signOut').addEventListener('click', function(){
+  if(dirty && !confirm('There are changes that have not reached the server. Sign out anyway?')) return;
+  lsDel(CODE_KEY); code=null; myName=null; clearInterval(pollTimer);
+  setSync('','signed out'); openGate('Signed out. Enter a code to open the ledger again.');
+});
+
+function afterConnect(d){
+  rev = d.rev||0; lsSet(REV_KEY,String(rev));
+  var localHas = hasRealData();
+  if(d.state){
+    var same = JSON.stringify(normalise(d.state))===JSON.stringify(S);
+    if(localHas && !same){ conflictState=d; showConflict(d); setSync('bad','not saved'); renderAll(); }
+    else adopt(d, true);
+  } else if(localHas){
+    setSync('busy','saving…'); pushNow(false);
+  } else {
+    ensureStarter(); renderAll(); setSync('ok','ready — nothing saved yet');
+  }
+  startPolling();
+}
+
+/* ---- backup view ---- */
+function histMsg(t){
+  el('histBody').innerHTML='<tr><td colspan="6" style="padding:14px;color:var(--ink-3)">'+esc(t)+'</td></tr>';
+}
+function renderBackup(){
+  el('bkMe').textContent = myName || 'not signed in';
+  if(!code){
+    el('bkWhen').textContent='—'; el('bkWho').textContent='—'; el('bkCount').textContent='0';
+    histMsg('Sign in to see the saved versions.'); return;
+  }
+  histMsg('Loading…');
+  apiCall('/api/history').then(function(r){
+    if(r.status!==200){ histMsg('Could not load the history (error '+r.status+').'); return; }
+    var items=(r.data&&r.data.items)||[];
+    el('bkCount').textContent=items.length;
+    el('bkWhen').textContent = items.length ? shortDateTime(items[0].ts) : '—';
+    el('bkWho').textContent  = items.length ? items[0].who : '—';
+    if(!items.length){ histMsg('Nothing saved yet.'); return; }
+    el('histBody').innerHTML = items.map(function(it,i){
+      return '<tr'+(i===0?' class="cur"':'')+'>'+
+        '<td>'+esc(shortDateTime(it.ts))+'</td>'+
+        '<td>'+esc(it.who)+'</td>'+
+        '<td class="n">'+(it.days|0)+'</td>'+
+        '<td class="n">'+(it.payments|0)+'</td>'+
+        '<td class="n">'+esc(it.net)+'</td>'+
+        '<td>'+(i===0 ? '<span style="color:var(--bob);font-weight:700">this is the one in use</span>'
+                      : '<button class="btn alt sm" data-restore="'+it.id+'">Put this back</button>')+
+        '</td></tr>';
+    }).join('');
+  }).catch(function(){ histMsg('Could not reach the server.'); });
+}
+el('histRefresh').addEventListener('click', renderBackup);
+el('histBody').addEventListener('click', function(ev){
+  var b=ev.target.closest('[data-restore]'); if(!b) return;
+  if(!confirm('Put the whole ledger back to this version?\n\n'+
+              'What you have now is kept in the list, so this can be undone.')) return;
+  apiCall('/api/restore', {id:Number(b.dataset.restore), net:fmtSigned(allTimeOutstanding())})
+    .then(function(r){
+      if(r.status===200){ adopt(r.data, true); renderBackup(); toast('Ledger put back to that version.'); }
+      else alert('Could not put it back: '+((r.data&&r.data.error)||('error '+r.status)));
+    }).catch(function(){ alert('Could not reach the server.'); });
+});
+
+window.addEventListener('beforeunload', function(ev){
+  if(dirty && code){ ev.preventDefault(); ev.returnValue=''; }
+});
+
 /* ================= toast ================= */
 var toastTimer;
 function toast(msg){
@@ -907,16 +1239,25 @@ function toast(msg){
 
 /* ================= boot ================= */
 S=load();
-if(!S.days.length) S.days.push({id:uid(), date:iso(new Date()), b:'',c:'',d:'',e:'',f:'',g:'',
-                                pbo:'',pgsx:'',ppanel:'', amt:'', by:'Bob', settle:'NO'});
 renderRates(); renderDaily(); renderSummary();
 show(location.hash.slice(1) || 'daily');
-if(!storageOk){
-  el('saved').textContent='NOT SAVING';
-  el('saved').style.color='#ffb3a7';
-  alert('This browser will not let the page save data (private mode, or storage is blocked).\n\n'+
-        'The calculations still work, but nothing will be kept when you close the tab. '+
-        'Use "Download backup" before you leave.');
+
+code = lsGet(CODE_KEY);
+rev  = parseInt(lsGet(REV_KEY)||'0',10) || 0;
+if(code){
+  setSync('busy','connecting…');
+  apiCall('/api/load').then(function(r){
+    if(r.status===200){ myName=r.data.name; afterConnect(r.data); }
+    else if(r.status===401){ code=null; lsDel(CODE_KEY); openGate('That access code no longer works.'); }
+    else { offline=true; ensureStarter(); renderAll();
+           setSync('off','offline — will save when it reconnects'); startPolling(); }
+  }).catch(function(){
+    offline=true; ensureStarter(); renderAll();
+    setSync('off','offline — will save when it reconnects'); startPolling();
+  });
+} else {
+  ensureStarter(); renderAll();
+  setSync('','not signed in'); openGate('');
 }
 window.LEDGER={get S(){return S;}, calcDay:calcDay, summary:summary,
                allTimeOutstanding:allTimeOutstanding, U:U};

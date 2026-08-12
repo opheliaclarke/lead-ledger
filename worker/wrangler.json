@@ -1,0 +1,14 @@
+{
+  "name": "lead-ledger",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lead_ledger",
+      "database_id": "efbb08d2-6670-49f9-bfbb-05772ad23136"
+    }
+  ]
+}
