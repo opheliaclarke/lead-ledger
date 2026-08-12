@@ -789,7 +789,9 @@ el('daysBody').addEventListener('input', onDayEdit);
 el('daysBody').addEventListener('change', onDayEdit);
 function onDayEdit(ev){
   var inp=ev.target; if(!inp.dataset || !inp.dataset.k) return;
-  var tr=inp.closest('tr'), d=byId(tr.dataset.id); if(!d) return;
+  if(applying || !document.body.contains(inp)) return;   // stale event from a replaced row
+  var tr=inp.closest('tr'); if(!tr) return;
+  var d=byId(tr.dataset.id); if(!d) return;
   d[inp.dataset.k]=inp.value;
   paintRow(tr,d); paintFoot(); paintFlags(); paintTop(); save();
 }
@@ -891,7 +893,9 @@ el('payBody').addEventListener('input', onPayEdit);
 el('payBody').addEventListener('change', onPayEdit);
 function onPayEdit(ev){
   var inp=ev.target; if(!inp.dataset || !inp.dataset.k) return;
-  var id=inp.closest('tr').dataset.id;
+  if(applying || !document.body.contains(inp)) return;   // stale event from a replaced row
+  var tr=inp.closest('tr'); if(!tr) return;
+  var id=tr.dataset.id;
   S.payments.forEach(function(p){ if(p.id===id) p[inp.dataset.k]=inp.value; });
   save(); renderSummary();
 }
@@ -1080,6 +1084,10 @@ function pushNow(force){
 /* ---- pulling ---- */
 function adopt(d, quiet){
   applying=true;
+  // blur first, inside the guard: removing a focused, edited input fires `change`
+  // afterwards, which would write the discarded value back and save it as a new version
+  try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
+  catch(e){}
   S=normalise(d.state||{}); rev=d.rev; lsSet(REV_KEY,String(rev));
   dirty=false; conflictState=null; el('conflict').hidden=true;
   saveLocal(); ensureStarter(); renderAll();
