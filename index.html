@@ -4,286 +4,915 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Bob &amp; Olivia — lead ledger</title>
+<title>Lead ledger — Bob &amp; Olivia</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b2430'/%3E%3Cpath d='M7 11h18M7 16h18M7 21h11' stroke='%23f4c95d' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 :root{
-  --ink:#1b2430; --ink-2:#41505f; --paper:#fbf9f5; --card:#ffffff;
-  --line:#d9d3c7; --line-2:#eae5db;
-  --bob:#155e34; --bob-bg:#e4f2e8;
-  --oli:#8e2a1f; --oli-bg:#fbe7e3;
-  --neu:#5d6570; --neu-bg:#f0f0ee;
-  --accent:#8a6a12; --accent-bg:#fdf3d8;
+  --ink:#1b2430; --ink-2:#41505f; --ink-3:#66727f;
+  --paper:#fbf9f5; --card:#fff; --line:#d9d3c7; --line-2:#eae5db;
+  --bob:#155e34; --bob-bg:#e4f2e8; --bob-br:#a8cfb8;
+  --oli:#8e2a1f; --oli-bg:#fbe7e3; --oli-br:#e3b3a9;
+  --neu-bg:#f1f1ef;
+  --accent:#8a6a12; --accent-bg:#fdf3d8; --accent-br:#e2cf9a;
+  --focus:#0b4f8a;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font:18px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
-.wrap{max-width:1000px;margin:0 auto;padding:0 20px 96px}
-header{border-bottom:3px solid var(--ink);padding:44px 0 26px;margin-bottom:40px}
-.kicker{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
-h1{font-size:clamp(30px,5.4vw,46px);line-height:1.1;margin:12px 0 10px;letter-spacing:-.02em}
-.lede{font-size:20px;color:var(--ink-2);margin:0;max-width:62ch}
-h2{font-size:clamp(21px,3.2vw,27px);margin:56px 0 6px;letter-spacing:-.01em;padding-top:14px;border-top:1px solid var(--line)}
-h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:10px}
-h3{font-size:19px;margin:32px 0 8px}
-p{margin:12px 0;max-width:70ch}
-a{color:#0b4f8a}
-a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+h1,h2,h3{letter-spacing:-.01em}
+a{color:var(--focus)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.tnum{font-variant-numeric:tabular-nums}
 
-.dl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:26px 0 4px}
-.btn{
-  display:inline-flex;align-items:center;gap:10px;min-height:52px;
-  background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:17px;
-  padding:12px 24px;border-radius:8px;border:2px solid var(--ink);
-}
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:40;background:var(--ink);color:#fff;
+  box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.top-in{max-width:1500px;margin:0 auto;padding:10px 18px;display:flex;gap:18px;
+  align-items:center;flex-wrap:wrap}
+.brand{font-weight:800;font-size:17px;letter-spacing:-.01em;white-space:nowrap}
+.brand span{color:#f4c95d}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav a{color:#c8d2dc;text-decoration:none;font-weight:600;font-size:15px;
+  padding:9px 14px;border-radius:7px;min-height:40px;display:flex;align-items:center}
+nav a:hover{background:rgba(255,255,255,.1);color:#fff}
+nav a[aria-current="page"]{background:#fff;color:var(--ink)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.balance{text-align:right;line-height:1.2}
+.balance .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9fb0c0}
+.balance .val{font-size:19px;font-weight:800}
+.balance .val.pos{color:#7fe0a4} .balance .val.neg{color:#ffb3a7} .balance .val.zero{color:#c8d2dc}
+.saved{font-size:13px;color:#9fb0c0;white-space:nowrap}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1500px;margin:0 auto;padding:26px 18px 110px}
+.view{display:none} .view.on{display:block}
+.head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.head h1{font-size:26px;margin:0}
+.head p{margin:0;color:var(--ink-2);font-size:16px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}
+
+button{font:inherit}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:9px 18px;
+  border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:#fff;
+  font-weight:700;font-size:16px;cursor:pointer;text-decoration:none}
 .btn:hover{background:#000}
 .btn.alt{background:transparent;color:var(--ink)}
 .btn.alt:hover{background:var(--line-2)}
-.meta{font-size:15px;color:var(--ink-2)}
+.btn.sm{min-height:38px;padding:6px 13px;font-size:15px;border-width:1px}
+.btn.danger{border-color:var(--oli);color:var(--oli);background:transparent}
+.btn.danger:hover{background:var(--oli-bg)}
+.tog{display:inline-flex;align-items:center;gap:9px;font-size:15px;color:var(--ink-2);
+  cursor:pointer;min-height:44px;padding:0 4px}
+.tog input{width:19px;height:19px;accent-color:var(--ink)}
 
-.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:8px;background:var(--card)}
-table{border-collapse:collapse;width:100%;font-size:16px;min-width:560px}
-th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-2);vertical-align:top}
-thead th{background:var(--ink);color:#fff;font-size:14px;letter-spacing:.03em;position:sticky;top:0}
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+thead th{background:var(--ink);color:#fff;font-weight:700;font-size:12.5px;
+  padding:8px 8px;text-align:left;white-space:nowrap;letter-spacing:.02em}
+thead tr.grp th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:#9fb0c0;border-bottom:1px solid #33404e;padding-bottom:5px}
+thead th.g-oli{background:#1f3a2a} thead th.g-glu{background:#3a231f}
+tbody td{padding:5px 7px;border-bottom:1px solid var(--line-2);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-tr.bob td:last-child{background:var(--bob-bg);color:var(--bob);font-weight:700}
-tr.oli td:last-child{background:var(--oli-bg);color:var(--oli);font-weight:700}
-tr.neu td:last-child{background:var(--neu-bg);color:var(--neu)}
-.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:13px;font-weight:700;white-space:nowrap}
-.t-bob{background:var(--bob-bg);color:var(--bob)}
-.t-oli{background:var(--oli-bg);color:var(--oli)}
-.t-neu{background:var(--neu-bg);color:var(--neu)}
+tbody tr:hover{background:#fdfcfa}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tfoot td{padding:9px 7px;font-weight:800;border-top:2px solid var(--ink);
+  font-variant-numeric:tabular-nums;background:#f7f5f1}
 
-.rule{
-  background:var(--card);border:2px solid var(--ink);border-radius:10px;
-  padding:22px 24px;margin:22px 0;
-}
-.rule .eq{font-size:clamp(17px,2.6vw,22px);font-weight:700;line-height:1.5;letter-spacing:-.01em}
+input[type=text],input[type=number],input[type=date],select{
+  font:inherit;font-size:15px;padding:7px 8px;border:1px solid var(--line);
+  border-radius:6px;background:#fffdf8;color:var(--ink);width:100%;min-height:40px}
+input:focus,select:focus{border-color:var(--focus);background:#fff}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.w-date{min-width:140px} .w-cnt{width:74px;min-width:64px} .w-mon{width:96px;min-width:84px}
+.w-sel{width:104px;min-width:92px}
+input.over{border-color:var(--accent);background:var(--accent-bg);font-weight:700}
+
+td.calc{font-variant-numeric:tabular-nums;color:var(--ink-2);white-space:nowrap}
+td.owes-b{background:var(--bob-bg);color:var(--bob);font-weight:700}
+td.owes-o{background:var(--oli-bg);color:var(--oli);font-weight:700}
+td.net{font-weight:800;font-size:17px;white-space:nowrap;min-width:132px}
+td.net .dir{display:block;font-size:11.5px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;opacity:.85}
+td.net.pos{background:var(--bob-bg);color:var(--bob)}
+td.net.neg{background:var(--oli-bg);color:var(--oli)}
+td.net.zero{background:var(--neu-bg);color:var(--ink-3)}
+.x{background:none;border:1px solid var(--line);color:var(--ink-3);border-radius:6px;
+  width:36px;height:36px;cursor:pointer;font-size:17px;line-height:1}
+.x:hover{background:var(--oli-bg);color:var(--oli);border-color:var(--oli-br)}
+.warn-row td{box-shadow:inset 3px 0 0 var(--accent)}
+
+.empty{padding:44px 22px;text-align:center;color:var(--ink-2)}
+.empty p{margin:0 0 16px}
+
+/* ---------- cards / panels ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:20px 22px;margin:16px 0}
+.panel h2{font-size:19px;margin:0 0 4px}
+.panel .hint{color:var(--ink-2);font-size:15px;margin:0 0 14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px 26px}
+.field{display:grid;grid-template-columns:1fr 118px;gap:12px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line-2)}
+.field:last-child{border-bottom:0}
+.field label{font-size:15.5px}
+.field .sub{display:block;color:var(--ink-3);font-size:13.5px;line-height:1.35}
+.tagb{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:800;
+  letter-spacing:.03em}
+.tagb.b{background:var(--bob-bg);color:var(--bob)} .tagb.o{background:var(--oli-bg);color:var(--oli)}
+
+.answer{border-radius:12px;padding:24px 26px;margin:18px 0;border:2px solid}
+.answer .lbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.75}
+.answer .big{font-size:clamp(28px,6vw,44px);font-weight:800;line-height:1.1;margin:6px 0 2px;
+  font-variant-numeric:tabular-nums}
+.answer .sub{font-size:16px;opacity:.85}
+.answer.pos{background:var(--bob-bg);border-color:var(--bob-br);color:var(--bob)}
+.answer.neg{background:var(--oli-bg);border-color:var(--oli-br);color:var(--oli)}
+.answer.zero{background:var(--neu-bg);border-color:var(--line);color:var(--ink-2)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:14px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:13px 15px}
+.stat .k{font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.stat .v{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px}
+.stat.b .v{color:var(--bob)} .stat.o .v{color:var(--oli)}
+
+.note{border-left:4px solid var(--line);padding:3px 0 3px 16px;margin:16px 0;
+  color:var(--ink-2);font-size:16px;max-width:80ch}
+.note.warn{border-color:var(--accent);background:var(--accent-bg);padding:12px 16px;border-radius:0 8px 8px 0}
+.flags{margin:14px 0}
+.flag{display:flex;gap:10px;align-items:flex-start;background:var(--accent-bg);
+  border:1px solid var(--accent-br);border-radius:8px;padding:11px 15px;margin-bottom:8px;font-size:15.5px}
+.flag b{white-space:nowrap}
+
+.lanes td:last-child{font-weight:700}
+.lanes tr.b td:last-child{background:var(--bob-bg);color:var(--bob)}
+.lanes tr.o td:last-child{background:var(--oli-bg);color:var(--oli)}
+.lanes tr.n td:last-child{background:var(--neu-bg);color:var(--ink-3);font-weight:400}
+.rule{background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:20px 22px;margin:18px 0}
+.rule .eq{font-size:clamp(16px,2.4vw,21px);font-weight:800;line-height:1.5}
 .rule .eq .p{color:var(--bob)} .rule .eq .m{color:var(--oli)}
-.rule p{margin:12px 0 0;font-size:17px;color:var(--ink-2)}
-
-.q{background:var(--accent-bg);border:1px solid #e2cf9a;border-left:6px solid var(--accent);
-   border-radius:8px;padding:18px 22px;margin:16px 0}
-.q h3{margin:0 0 6px;font-size:18px}
-.q p{margin:6px 0 0;font-size:17px}
-.q .mine{font-size:16px;color:#6b5410;margin-top:10px}
-
-.note{border-left:4px solid var(--line);padding:2px 0 2px 18px;margin:18px 0;color:var(--ink-2);font-size:17px}
-
-ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:16px 0}
-ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 46px;max-width:70ch}
-ol.steps li::before{
-  content:counter(s);position:absolute;left:0;top:8px;width:30px;height:30px;
+.rule p{margin:10px 0 0;color:var(--ink-2);font-size:16px}
+ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:14px 0}
+ol.steps li{counter-increment:s;position:relative;padding:7px 0 7px 44px;max-width:75ch}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:7px;width:29px;height:29px;
   background:var(--ink);color:#fff;border-radius:50%;display:grid;place-items:center;
-  font-size:15px;font-weight:700
+  font-size:14px;font-weight:700}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(140%);
+  background:var(--ink);color:#fff;padding:13px 22px;border-radius:9px;font-weight:600;
+  box-shadow:0 8px 26px rgba(0,0,0,.28);transition:transform .22s ease;z-index:90;max-width:92vw}
+.toast.on{transform:translateX(-50%) translateY(0)}
+footer{max-width:1500px;margin:0 auto;padding:26px 18px 60px;color:var(--ink-3);font-size:14.5px;
+  border-top:1px solid var(--line)}
+
+/* ---------- mobile: table becomes cards ---------- */
+@media (max-width:980px){
+  .tw{border:0;background:none;overflow:visible}
+  table.resp,table.resp tbody,table.resp tr,table.resp td{display:block;width:100%}
+  table.resp thead{display:none}
+  table.resp tr{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    margin-bottom:14px;padding:6px 4px;overflow:hidden}
+  table.resp td{border-bottom:1px solid var(--line-2);display:flex;align-items:center;
+    justify-content:space-between;gap:14px;padding:9px 13px;text-align:right}
+  table.resp td:last-child{border-bottom:0}
+  table.resp td::before{content:attr(data-l);font-weight:700;font-size:14px;color:var(--ink-2);
+    text-align:left;flex:1 1 auto}
+  table.resp td>*{flex:0 0 auto}
+  table.resp .w-cnt,table.resp .w-mon,table.resp .w-sel,table.resp .w-date{width:130px}
+  table.resp td.net{font-size:20px;padding:13px}
+  table.resp tfoot{display:block}
+  table.resp tfoot td{display:flex;justify-content:space-between}
+  .field{grid-template-columns:1fr 108px}
 }
-.calc{font-variant-numeric:tabular-nums;font-size:15px;color:var(--ink-2);white-space:nowrap}
-.net-pos{color:var(--bob);font-weight:700} .net-neg{color:var(--oli);font-weight:700}
-footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);font-size:15px;color:var(--ink-2)}
-@media (max-width:640px){ body{font-size:17px} .wrap{padding:0 16px 72px} }
 </style>
 </head>
 <body>
+
+<div class="top">
+  <div class="top-in">
+    <div class="brand">Lead ledger <span>·</span> Bob &amp; Olivia</div>
+    <nav>
+      <a href="#daily" data-v="daily">Daily</a>
+      <a href="#summary" data-v="summary">Summary</a>
+      <a href="#rates" data-v="rates">Rates &amp; data</a>
+      <a href="#guide" data-v="guide">How it works</a>
+    </nav>
+    <div class="top-right">
+      <div class="balance">
+        <div class="lbl">Outstanding, all time</div>
+        <div class="val zero" id="topBal">0.00</div>
+      </div>
+      <div class="saved" id="saved">saved</div>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 
-<header>
-  <div class="kicker">Lead ledger · Bob &amp; Olivia</div>
-  <h1>Who owes whom, worked out every day</h1>
-  <p class="lede">Three lead sources, two sets of buyers, one panel. This is the sheet that turns
-  the day's lead counts into a single number: how much moves between Bob and Olivia.</p>
-  <div class="dl">
-    <a class="btn" href="lead-ledger-bob-olivia.xlsx" download>Download the Excel file</a>
-    <span class="meta">.xlsx · 5 tabs · formulas already in 300 rows</span>
+<!-- ============================ DAILY ============================ -->
+<section class="view" id="v-daily">
+  <div class="head">
+    <h1>Daily</h1>
+    <p>Type the date and the lead counts. Everything else works itself out.</p>
   </div>
-</header>
+  <div class="bar">
+    <button class="btn" id="addDay">+ Add a day</button>
+    <label class="tog"><input type="checkbox" id="togPrices">
+      Per-day prices <span style="color:var(--ink-3)">(only if a price changed that day)</span></label>
+  </div>
 
-<h2><span class="num">1</span>The whole setup, in six lanes</h2>
-<p>Every lead that exists is one of these six. Three of them create a debt between Bob and Olivia.
-The other three don't — both ends of the deal already belong to the same person.</p>
+  <div id="flagsDaily" class="flags"></div>
 
-<div class="tw">
-<table>
-<thead><tr>
-  <th>Lead came from</th><th>Sold to</th><th>Who paid for the lead</th>
-  <th>Who collects the sale</th><th>Effect between Bob and Olivia</th>
-</tr></thead>
-<tbody>
-<tr class="bob"><td>Bob's own campaign</td><td>Olivia</td><td>Bob (ad spend)</td><td>Olivia buys it</td><td>Olivia owes Bob</td></tr>
-<tr class="bob"><td>S</td><td>Olivia</td><td>Bob (pays S)</td><td>Olivia buys it</td><td>Olivia owes Bob</td></tr>
-<tr class="neu"><td>GS</td><td>Olivia</td><td>Olivia (pays GS)</td><td>Olivia's own buyer</td><td>nothing</td></tr>
-<tr class="neu"><td>Bob's own campaign</td><td>GLU (Bob's buyer)</td><td>Bob (ad spend)</td><td>Bob, from GLU</td><td>nothing *</td></tr>
-<tr class="neu"><td>S</td><td>GLU (Bob's buyer)</td><td>Bob (pays S)</td><td>Bob, from GLU</td><td>nothing *</td></tr>
-<tr class="oli"><td>GS</td><td>GLU (Bob's buyer)</td><td>Olivia (pays GS)</td><td>Bob, from GLU</td><td>Bob owes Olivia</td></tr>
-</tbody>
-</table>
+  <div class="tw">
+    <table class="resp" id="tblDaily">
+      <thead>
+        <tr class="grp">
+          <th></th>
+          <th class="g-oli" colspan="3">Leads sold to Olivia</th>
+          <th class="g-glu" colspan="3">Leads sold to Bob's private buyer</th>
+          <th></th>
+          <th class="pcol">Per-day prices</th><th class="pcol"></th><th class="pcol"></th>
+          <th colspan="2">Money between them</th>
+          <th colspan="3">Other cost</th>
+          <th></th><th></th>
+        </tr>
+        <tr>
+          <th>Date</th>
+          <th class="n">Bob's own</th><th class="n">S</th><th class="n">GS</th>
+          <th class="n">Bob's own</th><th class="n">S</th><th class="n">GS</th>
+          <th class="n">Leads</th>
+          <th class="n pcol">Bob→Olivia</th><th class="n pcol">GS→buyer</th><th class="n pcol">Panel fee</th>
+          <th class="n">Olivia owes Bob</th><th class="n">Bob owes Olivia</th>
+          <th class="n">Amount</th><th>Paid by</th><th>Settle?</th>
+          <th class="n">Net for the day</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="daysBody"></tbody>
+      <tfoot id="daysFoot"></tfoot>
+    </table>
+  </div>
+  <div class="empty" id="emptyDaily" hidden>
+    <p>No days yet.</p>
+    <button class="btn" id="addDay2">+ Add the first day</button>
+  </div>
+
+  <div class="note">A day with nothing in it costs nothing — leave lanes blank when they didn't happen.
+    The <b>GS → Olivia</b> column never moves money between the two of them; it's here so the day is
+    a complete record.</div>
+</section>
+
+<!-- ============================ SUMMARY ============================ -->
+<section class="view" id="v-summary">
+  <div class="head">
+    <h1>Summary</h1>
+    <p>Set the two dates to settle a week, a month, or everything.</p>
+  </div>
+
+  <div class="panel" style="padding:16px 20px">
+    <div class="bar" style="margin:0">
+      <label style="display:flex;align-items:center;gap:9px">From
+        <input type="date" id="winFrom" class="w-date"></label>
+      <label style="display:flex;align-items:center;gap:9px">To
+        <input type="date" id="winTo" class="w-date"></label>
+      <button class="btn alt sm" id="winAll">All time</button>
+      <button class="btn alt sm" id="winMonth">This month</button>
+      <span id="winCount" style="color:var(--ink-2);font-size:15px"></span>
+    </div>
+  </div>
+
+  <div class="answer zero" id="answer">
+    <div class="lbl">Still outstanding after money already transferred</div>
+    <div class="big" id="ansBig">0.00</div>
+    <div class="sub" id="ansSub">Nothing owed either way.</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat b"><div class="k">Olivia owes Bob</div><div class="v" id="sL">0.00</div></div>
+    <div class="stat o"><div class="k">Bob owes Olivia</div><div class="v" id="sM">0.00</div></div>
+    <div class="stat"><div class="k">Other cost settled</div><div class="v" id="sQ">0.00</div></div>
+    <div class="stat"><div class="k">Net before payments</div><div class="v" id="sNet">0.00</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Leads in the period</h2>
+    <div class="tw" style="border:0">
+      <table class="lanes">
+        <thead><tr><th>Lane</th><th class="n">Leads</th><th>What it does</th></tr></thead>
+        <tbody id="laneBody"></tbody>
+        <tfoot><tr><td><b>Total</b></td><td class="n" id="laneTotal">0</td><td></td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Money already transferred</h2>
+    <p class="hint">Log every payment here. Without it the ledger keeps asking for money that has
+      already moved.</p>
+    <div class="tw" style="border:0">
+      <table class="resp" id="tblPay">
+        <thead><tr><th>Date</th><th>Paid by</th><th class="n">Amount</th><th>Note</th><th></th></tr></thead>
+        <tbody id="payBody"></tbody>
+      </table>
+    </div>
+    <div class="bar" style="margin-bottom:0"><button class="btn alt sm" id="addPay">+ Add a payment</button></div>
+    <div class="stats" style="margin-bottom:0">
+      <div class="stat b"><div class="k">Paid by Olivia to Bob</div><div class="v" id="pO">0.00</div></div>
+      <div class="stat o"><div class="k">Paid by Bob to Olivia</div><div class="v" id="pB">0.00</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ RATES ============================ -->
+<section class="view" id="v-rates">
+  <div class="head"><h1>Rates &amp; data</h1><p>Set once. Every day uses these unless you override one.</p></div>
+
+  <div class="panel">
+    <h2>The three that move money</h2>
+    <p class="hint">These are the only numbers that decide what Bob and Olivia owe each other.</p>
+    <div class="grid2">
+      <div>
+        <div class="field">
+          <label for="r-pbo">Bob → Olivia, per lead
+            <span class="sub"><span class="tagb b">Olivia pays Bob</span> same price from Bob's campaign or from S</span></label>
+          <input type="number" id="r-pbo" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label for="r-pgsx">GS lead sold to Bob's private buyer, per lead
+            <span class="sub"><span class="tagb o">Bob pays Olivia</span> she paid GS, he collected — this sends it back</span></label>
+          <input type="number" id="r-pgsx" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label for="r-ppanel">Panel fee per lead on Bob's private-buyer leads
+            <span class="sub"><span class="tagb o">Bob pays Olivia</span> leave 0 if he pays nothing to use her panel</span></label>
+          <input type="number" id="r-ppanel" step="0.01" min="0">
+        </div>
+      </div>
+      <div>
+        <div class="note warn" style="margin-top:0">
+          <b>Open question.</b> Nobody has said what Bob pays for a GS lead that reaches his own buyer.
+          It is set to pass straight through at what GS costs Olivia — no margin either way. Change
+          it here the moment you agree a number, and every day recalculates.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Written down for reference</h2>
+    <p class="hint">Recorded so the prices exist somewhere. None of these change what the two of them owe.</p>
+    <div class="grid2">
+      <div>
+        <div class="field"><label for="r-bobcost">Bob's own campaign, cost per lead<span class="sub">his ad spend ÷ leads</span></label><input type="number" id="r-bobcost" step="0.01" min="0"></div>
+        <div class="field"><label for="r-scost">S, cost per lead<span class="sub">what Bob pays S</span></label><input type="number" id="r-scost" step="0.01" min="0"></div>
+      </div>
+      <div>
+        <div class="field"><label for="r-gscost">GS, cost per lead<span class="sub">what Olivia pays GS</span></label><input type="number" id="r-gscost" step="0.01" min="0"></div>
+        <div class="field"><label for="r-gluprice">Bob → GLU, price per lead<span class="sub">his private-buyer price</span></label><input type="number" id="r-gluprice" step="0.01" min="0"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Your data</h2>
+    <p class="hint">Everything lives in this browser and saves the moment you type. Export a copy to
+      keep it safe or to send it to someone.</p>
+    <div class="bar">
+      <button class="btn alt" id="expCsv">Download CSV</button>
+      <button class="btn alt" id="expJson">Download backup (JSON)</button>
+      <button class="btn alt" id="impBtn">Restore from backup</button>
+      <input type="file" id="impFile" accept="application/json,.json" hidden>
+      <a class="btn alt" href="lead-ledger-bob-olivia.xlsx" download>Excel version</a>
+    </div>
+    <div class="note warn"><b>This is the one real limit.</b> The ledger is stored in this browser
+      only. It is not shared with Olivia, and clearing your browser data would take it with it.
+      Download a backup now and then. If you want both of you typing into the same live ledger,
+      say so — that's a shared database behind it, not a bigger page.</div>
+    <div class="bar" style="margin-bottom:0">
+      <button class="btn danger sm" id="wipe">Delete everything and start again</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GUIDE ============================ -->
+<section class="view" id="v-guide">
+  <div class="head"><h1>How it works</h1><p>The whole model, in one table.</p></div>
+
+  <p style="max-width:75ch">The thing that makes this look complicated is that <b>who paid for the
+  lead</b> and <b>who collects the money</b> come apart. As long as both ends belong to one person,
+  nothing moves. A debt only appears when they split — and that happens in exactly three of the six lanes.</p>
+
+  <div class="tw">
+    <table class="lanes">
+      <thead><tr><th>Lead came from</th><th>Sold to</th><th>Who paid for it</th><th>Who collects</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr class="b"><td>Bob's own campaign</td><td>Olivia</td><td>Bob (ad spend)</td><td>Olivia buys it</td><td>Olivia owes Bob</td></tr>
+        <tr class="b"><td>S</td><td>Olivia</td><td>Bob (pays S)</td><td>Olivia buys it</td><td>Olivia owes Bob</td></tr>
+        <tr class="n"><td>GS</td><td>Olivia</td><td>Olivia (pays GS)</td><td>Olivia's own buyer</td><td>nothing</td></tr>
+        <tr class="n"><td>Bob's own campaign</td><td>GLU (Bob's buyer)</td><td>Bob (ad spend)</td><td>Bob, from GLU</td><td>nothing, unless a panel fee</td></tr>
+        <tr class="n"><td>S</td><td>GLU (Bob's buyer)</td><td>Bob (pays S)</td><td>Bob, from GLU</td><td>nothing, unless a panel fee</td></tr>
+        <tr class="o"><td>GS</td><td>GLU (Bob's buyer)</td><td>Olivia (pays GS)</td><td>Bob, from GLU</td><td>Bob owes Olivia</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rule">
+    <div class="eq">NET = <span class="p">what Olivia owes Bob</span> − <span class="m">what Bob owes Olivia</span> ± the other cost, if you settle it</div>
+    <p><b>Positive means Olivia pays Bob. Negative means Bob pays Olivia.</b> Daily nets simply add
+      up, so settling every day, every week or once a month gives the identical figure.</p>
+  </div>
+
+  <h2 style="font-size:20px;margin-top:34px">Each day</h2>
+  <ol class="steps">
+    <li>Add a day and put the date on it.</li>
+    <li>Put the lead counts in — how many came from Bob's campaign, from S, from GS, and whether each went to Olivia or to Bob's private buyer.</li>
+    <li>Prices come from the Rates tab automatically. Switch on <b>per-day prices</b> only if a price changed that day.</li>
+    <li>If there was another cost, put the amount, who paid it, and whether it settles between them.</li>
+    <li>Read the last column. It says who pays whom, and how much.</li>
+  </ol>
+
+  <div class="bar">
+    <button class="btn alt" id="loadEx">Load three example days</button>
+    <a class="btn alt" href="about.html">The full write-up</a>
+  </div>
+
+  <div class="note"><b>What this can't catch.</b> A lead count typed wrong, a lead logged in the wrong
+    lane, the wrong person named as the payer, or a price typed wrong — all of those calculate
+    perfectly and still send the wrong amount. The arithmetic is safe; the typing is not. Check the
+    counts against the panel's own report before anyone transfers money.</div>
+</section>
+
 </div>
-<p class="meta">* unless you agree a panel fee for Bob using Olivia's panel. There is a rate cell for it,
-set to 0, so it does nothing until you put a number in.</p>
-
-<div class="note">The thing that makes this look complicated is that <strong>who paid for the lead</strong>
-and <strong>who collects the money</strong> come apart. As long as both ends belong to one person,
-nothing moves. A debt only appears when they split — and that happens in exactly three of the six lanes.</div>
-
-<h2><span class="num">2</span>The one rule</h2>
-<div class="rule">
-  <div class="eq">NET &nbsp;=&nbsp; <span class="p">what Olivia owes Bob</span> &nbsp;&minus;&nbsp;
-  <span class="m">what Bob owes Olivia</span> &nbsp;&plusmn;&nbsp; the other cost, if you settle it</div>
-  <p>The NET is always written from Olivia's side. <strong>Positive means Olivia pays Bob.
-  Negative means Bob pays Olivia.</strong> It is the last column of the Daily tab, and it is
-  the only number you have to read.</p>
-</div>
-<p>Daily nets simply add up. Settling every day, every week or once a month gives the identical
-figure, so you can leave it running and settle whenever you like.</p>
-
-<h2><span class="num">3</span>What you type, and what the sheet does</h2>
-<ol class="steps">
-  <li>Put the date in the first column.</li>
-  <li>Put the six lead counts in — how many came from Bob's campaign, from S, from GS, and
-      whether each went to Olivia or to Bob's private buyer. Leave a lane blank if it didn't happen.</li>
-  <li>The three price columns fill themselves from the Rates tab. Type over one only if the
-      price changed that day — the price is never buried inside a formula, so a price change
-      can't quietly rewrite last month's numbers.</li>
-  <li>If there was any other cost, put the amount, who paid it, and YES or NO for whether it
-      settles between you.</li>
-  <li>Read the last column. It says, in words, who pays whom and how much.</li>
-</ol>
-
-<h3>The tabs</h3>
-<div class="tw">
-<table>
-<thead><tr><th>Tab</th><th>What it's for</th></tr></thead>
-<tbody>
-<tr><td><strong>How it works</strong></td><td>The six lanes and the rule, so anyone opening the file can follow it without asking.</td></tr>
-<tr><td><strong>Rates</strong></td><td>Set once. Three rates move money; four more are written down for reference only.</td></tr>
-<tr><td><strong>Daily</strong></td><td>Where you type. 300 rows already carry the formulas. Yellow = type here, grey = worked out for you, green = the answer.</td></tr>
-<tr><td><strong>Summary</strong></td><td>Totals between any two dates, a log of money already transferred, and what is still outstanding.</td></tr>
-<tr><td><strong>Example</strong></td><td>Three worked days with the numbers filled in, so you can check the maths against your own head.</td></tr>
-</tbody>
-</table>
-</div>
-
-<h2><span class="num">4</span>Three worked days</h2>
-<p>Using 8.00 per lead from Bob to Olivia, and 6.00 for a GS lead that ends up with Bob's buyer.
-These are the numbers on the Example tab of the file.</p>
-
-<div class="tw">
-<table>
-<thead><tr>
-  <th>Day</th><th>What happened</th><th class="num">Olivia owes Bob</th>
-  <th class="num">Bob owes Olivia</th><th class="num">Other</th><th class="num">NET</th>
-</tr></thead>
-<tbody>
-<tr>
-  <td>10 Aug</td>
-  <td>Bob's campaign running. 40 of his own to Olivia, 10 to GLU. Olivia took 25 from GS, and 12 GS leads went to GLU.</td>
-  <td class="num"><span class="calc">40 &times; 8 =</span> 320.00</td>
-  <td class="num"><span class="calc">12 &times; 6 =</span> 72.00</td>
-  <td class="num">&mdash;</td>
-  <td class="num net-pos">+248.00</td>
-</tr>
-<tr>
-  <td>11 Aug</td>
-  <td>Campaign down. Bob bought from S: 35 to Olivia, 8 to GLU. Olivia took 18 from GS, 20 GS to GLU. Bob paid a 30.00 cost you agreed to settle.</td>
-  <td class="num"><span class="calc">35 &times; 8 =</span> 280.00</td>
-  <td class="num"><span class="calc">20 &times; 6 =</span> 120.00</td>
-  <td class="num">+30.00</td>
-  <td class="num net-pos">+190.00</td>
-</tr>
-<tr>
-  <td>12 Aug</td>
-  <td>Thin day for Bob: 5 to Olivia, 2 to GLU. But 45 GS leads went to GLU. Olivia paid a 50.00 cost you agreed to settle.</td>
-  <td class="num"><span class="calc">5 &times; 8 =</span> 40.00</td>
-  <td class="num"><span class="calc">45 &times; 6 =</span> 270.00</td>
-  <td class="num">&minus;50.00</td>
-  <td class="num net-neg">&minus;280.00</td>
-</tr>
-<tr>
-  <td colspan="5"><strong>Three days together</strong></td>
-  <td class="num net-pos">+158.00</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>Day 3 is the case worth noticing: Bob had a quiet day but pulled 45 GS leads through to his own
-buyer, so the direction flips and <strong>Bob pays Olivia</strong>. Over the three days it nets back to
-Olivia paying Bob 158.00.</p>
-
-<h2><span class="num">5</span>What stops it going wrong</h2>
-<p>The Summary tab carries four checks. Each one rebuilds a figure by a different route than the
-column it is checking, so a broken formula shows up as a number instead of hiding.</p>
-<div class="tw">
-<table>
-<thead><tr><th>Check</th><th>How it is worked out differently</th></tr></thead>
-<tbody>
-<tr><td>1. Lead money</td><td>Multiplies the lead counts by the prices itself, instead of trusting the two money columns.</td></tr>
-<tr><td>2. Other cost</td><td>Re-reads the amount, the payer and the YES/NO, instead of trusting the adjustment column.</td></tr>
-<tr><td>3. The NET column</td><td>Catches a NET cell that has had a number typed straight into it.</td></tr>
-<tr><td>4. Missing price</td><td>Counts days priced at nothing. Should never be anything but zero.</td></tr>
-</tbody>
-</table>
-</div>
-<p>I broke the file six different ways on purpose and every one was caught, with the check reading
-back the exact size of the error.</p>
-<div class="note"><strong>What they cannot see, and I'd rather say it than let you find out later:</strong>
-a lead count typed wrong, leads logged in the wrong lane, the wrong person named as the payer, or a
-price typed wrong on the Rates tab. All four pass every check silently and still move the money — in
-my test, by as much as 64,368. Zero means the formulas are intact. It does not mean the numbers are
-right. Only the panel's own report does that.</div>
-
-<h2><span class="num">6</span>Four things I had to assume — tell me if any is wrong</h2>
-
-<div class="q">
-  <h3>1. What does Bob pay Olivia for a GS lead that goes to his private buyer?</h3>
-  <p>This is the one real gap. Olivia paid GS for that lead and Bob collected the money for it, so
-  something has to come back — but you've never said how much.</p>
-  <p class="mine">I've set it to whatever GS costs Olivia, so it passes straight through at cost with
-  no margin either way. One cell on the Rates tab. If you agreed a different number, or Olivia takes
-  a margin on it, type that instead and everything downstream follows.</p>
-</div>
-
-<div class="q">
-  <h3>2. Does Bob pay anything for using Olivia's panel?</h3>
-  <p>His private-buyer leads are delivered through her panel. If there's a per-lead fee for that, it
-  belongs in the settlement.</p>
-  <p class="mine">I've set the fee to 0, so today it does nothing. If there is one, put the number in
-  and it starts charging on Bob's private-buyer leads automatically.</p>
-</div>
-
-<div class="q">
-  <h3>3. An "other cost" marked YES — does the other person pay it all back, or half?</h3>
-  <p>You said add a column for other costs, who paid, and whether it counts in the final number. What
-  you didn't say is how much of it counts.</p>
-  <p class="mine">I've built it as <strong>paid back in full</strong>: if Bob paid it and it's marked
-  YES, Olivia reimburses the whole amount. If it should be split down the middle instead, say so and
-  it's a one-line change.</p>
-</div>
-
-<div class="q">
-  <h3>4. Is GLU the only private buyer, and is Olivia's price the same from every source?</h3>
-  <p>You said "private buyers" plural but only named GLU. And you said Bob's price to Olivia is always
-  the same — I've taken that to mean the same whether the lead came from his campaign or from S.</p>
-  <p class="mine">All of Bob's private buyers are counted together in one bucket, because for
-  <em>this</em> question it doesn't matter which of them bought — it only matters that the buyer was
-  Bob's and not Olivia's. If you want to see GLU separately from the others, that's a wider sheet and
-  I'd need to know how many there are.</p>
-</div>
-
-<h2><span class="num">7</span>One thing worth watching</h2>
-<p>The Summary tab has a block for <strong>money already transferred</strong>. Log every payment there.
-A ledger like this keeps totalling up what is owed in principle; unless the cash that has actually
-moved is written down next to it, the balance keeps asking for money that has already been paid.
-The "still outstanding" figure at the bottom is the one to act on.</p>
 
 <footer>
-  Built 12 August 2026. Every formula in the file was evaluated with a real Excel engine and matched
-  against a separate exact-arithmetic model of the six lanes — 302 cell checks, all passing, plus six
-  deliberate breakages all caught. Nothing here is a live system; it's a file you own.
+  Everything calculates in the page as you type — no spreadsheet, no server, nothing to install.
+  The arithmetic runs in whole hundredths so nothing drifts, and it matches the Excel model
+  cell for cell. <a href="about.html">How it was checked</a>.
 </footer>
 
-</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= money: exact integer units, 4dp ================= */
+var U = 10000;
+function toU(v){ var n = parseFloat(v); return isFinite(n) ? Math.round(n*U) : 0; }
+function cnt(v){ var n = parseInt(v,10); return isFinite(n) && n>0 ? n : 0; }
+function fmtU(u){
+  return (u/U).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtSigned(u){ return (u>0?'+':u<0?'−':'') + fmtU(Math.abs(u)); }
+
+/* ================= state ================= */
+var KEY='leadLedger.v1';
+var DEF = {
+  rates:{pbo:8, pgsx:6, ppanel:0, bobcost:0, scost:0, gscost:6, gluprice:0},
+  days:[], payments:[], win:{from:'',to:''}, showPrices:false
+};
+var S, storageOk = true;
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return JSON.parse(JSON.stringify(DEF));
+    var o = JSON.parse(raw);
+    return normalise(o);
+  }catch(e){ storageOk=false; return JSON.parse(JSON.stringify(DEF)); }
+}
+function normalise(o){
+  var d = JSON.parse(JSON.stringify(DEF));
+  if(!o || typeof o!=='object') return d;
+  if(o.rates) for(var k in d.rates){ if(typeof o.rates[k]==='number') d.rates[k]=o.rates[k]; }
+  d.days = Array.isArray(o.days) ? o.days.map(function(x){
+    return {id:x.id||uid(), date:x.date||'', b:x.b||'', c:x.c||'', d:x.d||'', e:x.e||'',
+            f:x.f||'', g:x.g||'', pbo:x.pbo===undefined?'':x.pbo, pgsx:x.pgsx===undefined?'':x.pgsx,
+            ppanel:x.ppanel===undefined?'':x.ppanel, amt:x.amt||'', by:x.by||'Bob',
+            settle:x.settle||'NO'};
+  }) : [];
+  d.payments = Array.isArray(o.payments) ? o.payments.map(function(x){
+    return {id:x.id||uid(), date:x.date||'', by:x.by||'Olivia', amt:x.amt||'', note:x.note||''};
+  }) : [];
+  if(o.win) d.win={from:o.win.from||'', to:o.win.to||''};
+  d.showPrices = !!o.showPrices;
+  return d;
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); flashSaved(); }
+  catch(e){ storageOk=false; el('saved').textContent='NOT SAVING'; el('saved').style.color='#ffb3a7'; }
+}
+var savedTimer;
+function flashSaved(){
+  var n=el('saved'); n.textContent='saving…';
+  clearTimeout(savedTimer);
+  savedTimer=setTimeout(function(){ n.textContent='saved'; },420);
+}
+function uid(){ return 'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function el(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+
+/* ================= the model ================= */
+function calcDay(d){
+  var b=cnt(d.b), c=cnt(d.c), dd=cnt(d.d), e=cnt(d.e), f=cnt(d.f), g=cnt(d.g);
+  var pbo    = d.pbo    !== '' && d.pbo    != null ? toU(d.pbo)    : toU(S.rates.pbo);
+  var pgsx   = d.pgsx   !== '' && d.pgsx   != null ? toU(d.pgsx)   : toU(S.rates.pgsx);
+  var ppanel = d.ppanel !== '' && d.ppanel != null ? toU(d.ppanel) : toU(S.rates.ppanel);
+
+  var L = (b + c) * pbo;                       // lanes 1 + 2
+  var M = g * pgsx + (e + f + g) * ppanel;     // lane 6, plus the panel fee
+  var amt = toU(d.amt);
+  var Q = d.settle === 'YES' ? (d.by === 'Bob' ? amt : -amt) : 0;
+  return {leads:b+c+dd+e+f+g, L:L, M:M, Q:Q, net:L-M+Q, pbo:pbo, pgsx:pgsx, ppanel:ppanel,
+          counts:[b,c,dd,e,f,g]};
+}
+function inWin(dateStr){
+  if(!dateStr) return false;
+  var f = S.win.from || '0000-01-01', t = S.win.to || '9999-12-31';
+  return dateStr >= f && dateStr <= t;
+}
+function summary(){
+  var o={lanes:[0,0,0,0,0,0], leads:0, L:0, M:0, Q:0, net:0, days:0, paidO:0, paidB:0};
+  S.days.forEach(function(d){
+    if(!inWin(d.date)) return;
+    var r=calcDay(d);
+    o.days++; o.leads+=r.leads; o.L+=r.L; o.M+=r.M; o.Q+=r.Q; o.net+=r.net;
+    for(var i=0;i<6;i++) o.lanes[i]+=r.counts[i];
+  });
+  S.payments.forEach(function(p){
+    if(!inWin(p.date)) return;
+    var a=toU(p.amt);
+    if(p.by==='Olivia') o.paidO+=a; else o.paidB+=a;
+  });
+  o.outstanding = o.net - o.paidO + o.paidB;
+  return o;
+}
+function allTimeOutstanding(){
+  var net=0, pO=0, pB=0;
+  S.days.forEach(function(d){ net += calcDay(d).net; });
+  S.payments.forEach(function(p){ var a=toU(p.amt); if(p.by==='Olivia') pO+=a; else pB+=a; });
+  return net - pO + pB;
+}
+function dirWords(u){
+  if(u>0) return {cls:'pos', dir:'Olivia → Bob', sentence:'Olivia pays Bob '+fmtU(u)+'.'};
+  if(u<0) return {cls:'neg', dir:'Bob → Olivia', sentence:'Bob pays Olivia '+fmtU(-u)+'.'};
+  return {cls:'zero', dir:'settled', sentence:'Nothing owed either way.'};
+}
+
+/* ================= routing ================= */
+var VIEWS=['daily','summary','rates','guide'];
+function show(v){
+  if(VIEWS.indexOf(v)<0) v='daily';
+  VIEWS.forEach(function(x){ el('v-'+x).classList.toggle('on', x===v); });
+  [].forEach.call(document.querySelectorAll('nav a'), function(a){
+    if(a.dataset.v===v) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+  });
+  if(v==='summary') renderSummary();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', function(){ show(location.hash.slice(1)); });
+
+/* ================= daily ================= */
+var LANE_LABELS=["Bob's own → Olivia","S → Olivia","GS → Olivia",
+                 "Bob's own → Bob's buyer","S → Bob's buyer","GS → Bob's buyer"];
+var LANE_EFFECT=["Olivia owes Bob","Olivia owes Bob","nothing — both ends are Olivia's",
+                 "nothing — both ends are Bob's","nothing — both ends are Bob's","Bob owes Olivia"];
+var LANE_CLASS=['b','b','n','n','n','o'];
+
+function rowHtml(d){
+  var f=['b','c','d','e','f','g'];
+  var h='<tr data-id="'+d.id+'">';
+  h+='<td data-l="Date"><input type="date" class="w-date" data-k="date" value="'+esc(d.date)+'"></td>';
+  for(var i=0;i<6;i++){
+    h+='<td data-l="'+esc(LANE_LABELS[i])+'"><input type="number" class="w-cnt" min="0" step="1" '+
+       'inputmode="numeric" data-k="'+f[i]+'" value="'+esc(d[f[i]])+'"></td>';
+  }
+  h+='<td class="calc n" data-l="Total leads" data-c="leads">0</td>';
+  ['pbo','pgsx','ppanel'].forEach(function(k,j){
+    var lbl=['Price Bob→Olivia','Price GS→buyer','Panel fee'][j];
+    h+='<td class="pcol" data-l="'+lbl+'"><input type="number" class="w-mon" step="0.01" min="0" '+
+       'data-k="'+k+'" value="'+esc(d[k])+'" placeholder=""></td>';
+  });
+  h+='<td class="owes-b n" data-l="Olivia owes Bob" data-c="L">0.00</td>';
+  h+='<td class="owes-o n" data-l="Bob owes Olivia" data-c="M">0.00</td>';
+  h+='<td data-l="Other cost"><input type="number" class="w-mon" step="0.01" min="0" data-k="amt" value="'+esc(d.amt)+'"></td>';
+  h+='<td data-l="Paid by"><select class="w-sel" data-k="by">'+
+     '<option value="Bob"'+(d.by==='Bob'?' selected':'')+'>Bob</option>'+
+     '<option value="Olivia"'+(d.by==='Olivia'?' selected':'')+'>Olivia</option></select></td>';
+  h+='<td data-l="Settle it?"><select class="w-sel" data-k="settle">'+
+     '<option value="NO"'+(d.settle==='NO'?' selected':'')+'>No</option>'+
+     '<option value="YES"'+(d.settle==='YES'?' selected':'')+'>Yes</option></select></td>';
+  h+='<td class="net zero" data-l="Net for the day" data-c="net">0.00<span class="dir">settled</span></td>';
+  h+='<td data-l="Remove"><button class="x" data-del="'+d.id+'" title="Remove this day" aria-label="Remove this day">×</button></td>';
+  return h+'</tr>';
+}
+
+function paintRow(tr, d){
+  var r=calcDay(d);
+  tr.querySelector('[data-c="leads"]').textContent = r.leads ? r.leads : '—';
+  tr.querySelector('[data-c="L"]').textContent = fmtU(r.L);
+  tr.querySelector('[data-c="M"]').textContent = fmtU(r.M);
+  var w=dirWords(r.net), net=tr.querySelector('[data-c="net"]');
+  net.className='net n '+w.cls;
+  net.innerHTML = esc(fmtSigned(r.net))+'<span class="dir">'+esc(w.dir)+'</span>';
+  // mark a price that has been typed over the rate
+  [['pbo','pbo'],['pgsx','pgsx'],['ppanel','ppanel']].forEach(function(p){
+    var inp=tr.querySelector('[data-k="'+p[0]+'"]');
+    if(!inp) return;
+    inp.placeholder = fmtU(toU(S.rates[p[1]]));
+    inp.classList.toggle('over', inp.value!=='' && toU(inp.value)!==toU(S.rates[p[1]]));
+  });
+}
+
+function renderDaily(){
+  S.days.sort(function(a,b){ return (a.date||'9999').localeCompare(b.date||'9999'); });
+  var body=el('daysBody');
+  body.innerHTML = S.days.map(rowHtml).join('');
+  [].forEach.call(body.children, function(tr){
+    var d=byId(tr.dataset.id); if(d) paintRow(tr,d);
+  });
+  el('emptyDaily').hidden = S.days.length>0;
+  el('tblDaily').style.display = S.days.length ? '' : 'none';
+  applyPriceCols();
+  paintFoot();
+  paintFlags();
+  paintTop();
+}
+function byId(id){
+  for(var i=0;i<S.days.length;i++) if(S.days[i].id===id) return S.days[i];
+  return null;
+}
+function paintFoot(){
+  var t={leads:0,L:0,M:0,net:0};
+  S.days.forEach(function(d){ var r=calcDay(d); t.leads+=r.leads; t.L+=r.L; t.M+=r.M; t.net+=r.net; });
+  var w=dirWords(t.net);
+  var pcols = S.showPrices ? '<td class="pcol"></td><td class="pcol"></td><td class="pcol"></td>' : '';
+  el('daysFoot').innerHTML = S.days.length ? '<tr>'+
+    '<td data-l="">All '+S.days.length+' days</td><td colspan="6"></td>'+
+    '<td class="n" data-l="Total leads">'+t.leads+'</td>'+ pcols +
+    '<td class="n" data-l="Olivia owes Bob">'+fmtU(t.L)+'</td>'+
+    '<td class="n" data-l="Bob owes Olivia">'+fmtU(t.M)+'</td>'+
+    '<td colspan="3"></td>'+
+    '<td class="n" data-l="Net, all days">'+fmtSigned(t.net)+'</td><td></td></tr>' : '';
+}
+function paintFlags(){
+  var out=[], seen={}, dupes={};
+  S.days.forEach(function(d){
+    if(!d.date) return;
+    if(seen[d.date]) dupes[d.date]=1; else seen[d.date]=1;
+  });
+  Object.keys(dupes).forEach(function(dt){
+    out.push('<div class="flag"><b>Same date twice:</b><span>'+esc(dt)+
+      ' appears on more than one row. That is allowed, but check it is not the same day entered twice.</span></div>');
+  });
+  var noDate = S.days.filter(function(d){ return !d.date; }).length;
+  if(noDate) out.push('<div class="flag"><b>'+noDate+' row'+(noDate>1?'s have':' has')+
+    ' no date:</b><span>a day with no date is left out of every summary and out of the outstanding balance.</span></div>');
+  var freeLeads = S.days.filter(function(d){
+    var r=calcDay(d);
+    return (cnt(d.b)+cnt(d.c))>0 && r.pbo===0;
+  }).length;
+  if(freeLeads) out.push('<div class="flag"><b>'+freeLeads+' day'+(freeLeads>1?'s sell':' sells')+
+    ' leads to Olivia at 0.00:</b><span>the price is zero, so those leads earn nothing. Check the rate.</span></div>');
+  el('flagsDaily').innerHTML = out.join('');
+}
+function applyPriceCols(){
+  var on=!!S.showPrices;
+  [].forEach.call(document.querySelectorAll('.pcol'), function(n){ n.style.display = on ? '' : 'none'; });
+  el('togPrices').checked = on;
+}
+function paintTop(){
+  var u=allTimeOutstanding(), w=dirWords(u), n=el('topBal');
+  n.className='val '+w.cls;
+  n.textContent = u===0 ? '0.00' : fmtSigned(u);
+  n.title = w.sentence;
+}
+
+/* input handling — update state and repaint only the derived cells */
+el('daysBody').addEventListener('input', onDayEdit);
+el('daysBody').addEventListener('change', onDayEdit);
+function onDayEdit(ev){
+  var inp=ev.target; if(!inp.dataset || !inp.dataset.k) return;
+  var tr=inp.closest('tr'), d=byId(tr.dataset.id); if(!d) return;
+  d[inp.dataset.k]=inp.value;
+  paintRow(tr,d); paintFoot(); paintFlags(); paintTop(); save();
+}
+el('daysBody').addEventListener('click', function(ev){
+  var b=ev.target.closest('[data-del]'); if(!b) return;
+  var d=byId(b.dataset.del); if(!d) return;
+  var label = d.date ? 'the day '+d.date : 'this empty row';
+  if(!confirm('Remove '+label+'? This cannot be undone.')) return;
+  S.days = S.days.filter(function(x){ return x.id!==b.dataset.del; });
+  save(); renderDaily(); toast('Day removed.');
+});
+function addDay(){
+  var last = S.days.length ? S.days[S.days.length-1].date : '';
+  var dt;
+  if(last){ var t=new Date(last+'T12:00:00'); t.setDate(t.getDate()+1); dt=iso(t); }
+  else dt = iso(new Date());
+  S.days.push({id:uid(), date:dt, b:'',c:'',d:'',e:'',f:'',g:'',
+               pbo:'',pgsx:'',ppanel:'', amt:'', by:'Bob', settle:'NO'});
+  save(); renderDaily();
+  var rows=el('daysBody').children;
+  if(rows.length){
+    var tr=rows[rows.length-1];
+    for(var i=0;i<rows.length;i++) if(rows[i].querySelector('[data-k="date"]').value===dt) tr=rows[i];
+    tr.querySelector('[data-k="b"]').focus();
+  }
+}
+function iso(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+el('addDay').addEventListener('click', addDay);
+el('addDay2').addEventListener('click', addDay);
+el('togPrices').addEventListener('change', function(){
+  S.showPrices=this.checked; save(); applyPriceCols(); paintFoot();
+});
+
+/* ================= rates ================= */
+var RATE_IDS=['pbo','pgsx','ppanel','bobcost','scost','gscost','gluprice'];
+function renderRates(){
+  RATE_IDS.forEach(function(k){ el('r-'+k).value = S.rates[k]; });
+}
+RATE_IDS.forEach(function(k){
+  el('r-'+k).addEventListener('input', function(){
+    var v=parseFloat(this.value);
+    S.rates[k] = isFinite(v) ? v : 0;
+    save(); renderDaily(); renderSummary();
+  });
+});
+
+/* ================= summary ================= */
+function renderSummary(){
+  el('winFrom').value=S.win.from; el('winTo').value=S.win.to;
+  var o=summary();
+  el('sL').textContent=fmtU(o.L);
+  el('sM').textContent=fmtU(o.M);
+  el('sQ').textContent=fmtSigned(o.Q);
+  el('sNet').textContent=fmtSigned(o.net);
+  el('pO').textContent=fmtU(o.paidO);
+  el('pB').textContent=fmtU(o.paidB);
+  el('winCount').textContent = o.days+(o.days===1?' day':' days')+' in range · '+o.leads+' leads';
+
+  var w=dirWords(o.outstanding);
+  var a=el('answer'); a.className='answer '+w.cls;
+  el('ansBig').textContent = o.outstanding===0 ? '0.00' : fmtU(Math.abs(o.outstanding));
+  el('ansSub').textContent = w.sentence + (o.paidO||o.paidB ?
+      ' Net for the period was '+fmtSigned(o.net)+', and '+fmtU(o.paidO+o.paidB)+' has already moved.' : '');
+  el('answer').querySelector('.lbl').textContent = (o.paidO||o.paidB)
+      ? 'Still outstanding after money already transferred' : 'Settlement for this period';
+
+  el('laneBody').innerHTML = LANE_LABELS.map(function(l,i){
+    return '<tr class="'+LANE_CLASS[i]+'"><td>'+esc(l)+'</td><td class="n">'+o.lanes[i]+
+           '</td><td>'+esc(LANE_EFFECT[i])+'</td></tr>';
+  }).join('');
+  el('laneTotal').textContent=o.leads;
+  renderPayments();
+  paintTop();
+}
+el('winFrom').addEventListener('change', function(){ S.win.from=this.value; save(); renderSummary(); });
+el('winTo').addEventListener('change', function(){ S.win.to=this.value; save(); renderSummary(); });
+el('winAll').addEventListener('click', function(){ S.win={from:'',to:''}; save(); renderSummary(); });
+el('winMonth').addEventListener('click', function(){
+  var n=new Date(), f=new Date(n.getFullYear(), n.getMonth(), 1), t=new Date(n.getFullYear(), n.getMonth()+1, 0);
+  S.win={from:iso(f), to:iso(t)}; save(); renderSummary();
+});
+
+function renderPayments(){
+  S.payments.sort(function(a,b){ return (a.date||'9999').localeCompare(b.date||'9999'); });
+  el('payBody').innerHTML = S.payments.length ? S.payments.map(function(p){
+    return '<tr data-id="'+p.id+'">'+
+      '<td data-l="Date"><input type="date" class="w-date" data-k="date" value="'+esc(p.date)+'"></td>'+
+      '<td data-l="Paid by"><select class="w-sel" data-k="by">'+
+        '<option value="Olivia"'+(p.by==='Olivia'?' selected':'')+'>Olivia</option>'+
+        '<option value="Bob"'+(p.by==='Bob'?' selected':'')+'>Bob</option></select></td>'+
+      '<td data-l="Amount"><input type="number" class="w-mon" step="0.01" min="0" data-k="amt" value="'+esc(p.amt)+'"></td>'+
+      '<td data-l="Note"><input type="text" data-k="note" value="'+esc(p.note)+'" placeholder="bank transfer, cash…"></td>'+
+      '<td data-l="Remove"><button class="x" data-delp="'+p.id+'" aria-label="Remove this payment">×</button></td></tr>';
+  }).join('') : '<tr><td colspan="5" style="color:var(--ink-3);padding:14px">No payments logged yet.</td></tr>';
+}
+el('payBody').addEventListener('input', onPayEdit);
+el('payBody').addEventListener('change', onPayEdit);
+function onPayEdit(ev){
+  var inp=ev.target; if(!inp.dataset || !inp.dataset.k) return;
+  var id=inp.closest('tr').dataset.id;
+  S.payments.forEach(function(p){ if(p.id===id) p[inp.dataset.k]=inp.value; });
+  save(); renderSummary();
+}
+el('payBody').addEventListener('click', function(ev){
+  var b=ev.target.closest('[data-delp]'); if(!b) return;
+  if(!confirm('Remove this payment?')) return;
+  S.payments = S.payments.filter(function(p){ return p.id!==b.dataset.delp; });
+  save(); renderSummary(); toast('Payment removed.');
+});
+el('addPay').addEventListener('click', function(){
+  S.payments.push({id:uid(), date:iso(new Date()), by:'Olivia', amt:'', note:''});
+  save(); renderSummary();
+  var rows=el('payBody').children;
+  if(rows.length) rows[rows.length-1].querySelector('[data-k="amt"]').focus();
+});
+
+/* ================= data in / out ================= */
+function dl(name, text, mime){
+  var b=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  var u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(u); a.remove(); },400);
+}
+function q(v){ v=String(v==null?'':v); return /[",\r\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+el('expCsv').addEventListener('click', function(){
+  var head=['Date','Bob own to Olivia','S to Olivia','GS to Olivia','Bob own to Bob buyer',
+    'S to Bob buyer','GS to Bob buyer','Total leads','Price Bob to Olivia','Price GS to Bob buyer',
+    'Panel fee','Olivia owes Bob','Bob owes Olivia','Other cost','Other paid by','Settle',
+    'Other adjustment','Net (+ Olivia pays Bob)','Who pays whom'];
+  var rows=[head.join(',')];
+  S.days.forEach(function(d){
+    var r=calcDay(d), w=dirWords(r.net);
+    rows.push([d.date, cnt(d.b),cnt(d.c),cnt(d.d),cnt(d.e),cnt(d.f),cnt(d.g), r.leads,
+      (r.pbo/U).toFixed(2),(r.pgsx/U).toFixed(2),(r.ppanel/U).toFixed(2),
+      (r.L/U).toFixed(2),(r.M/U).toFixed(2),
+      d.amt===''?'':parseFloat(d.amt).toFixed(2), d.by, d.settle,
+      (r.Q/U).toFixed(2), (r.net/U).toFixed(2), w.sentence].map(q).join(','));
+  });
+  rows.push('');
+  rows.push(['Payments'].join(','));
+  rows.push(['Date','Paid by','Amount','Note'].join(','));
+  S.payments.forEach(function(p){
+    rows.push([p.date,p.by,p.amt===''?'':parseFloat(p.amt).toFixed(2),p.note].map(q).join(','));
+  });
+  var o=summary();
+  rows.push('');
+  rows.push(['Outstanding, all time',(allTimeOutstanding()/U).toFixed(2)].map(q).join(','));
+  dl('lead-ledger-'+iso(new Date())+'.csv', rows.join('\r\n'), 'text/csv;charset=utf-8');
+  toast('CSV downloaded.');
+});
+function backupJson(){ return JSON.stringify({v:1, saved:new Date().toISOString(), data:S}, null, 2); }
+el('expJson').addEventListener('click', function(){
+  dl('lead-ledger-backup-'+iso(new Date())+'.json', backupJson(), 'application/json');
+  toast('Backup downloaded.');
+});
+el('impBtn').addEventListener('click', function(){ el('impFile').click(); });
+el('impFile').addEventListener('change', function(){
+  var f=this.files && this.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var o=JSON.parse(rd.result);
+      var payload = o && o.data ? o.data : o;
+      if(!payload || !Array.isArray(payload.days)) throw new Error('not a ledger backup');
+      if(!confirm('Replace everything currently in this ledger with the backup?\n\n'+
+                  payload.days.length+' days and '+((payload.payments||[]).length)+' payments will be loaded.')) return;
+      S=normalise(payload); save(); renderRates(); renderDaily(); renderSummary();
+      toast('Backup restored.');
+    }catch(e){ alert('That file could not be read as a ledger backup.\n\n'+e.message); }
+  };
+  rd.readAsText(f); this.value='';
+});
+el('wipe').addEventListener('click', function(){
+  if(!S.days.length && !S.payments.length){ toast('Nothing to delete.'); return; }
+  if(!confirm('Delete every day and every payment?\n\nA backup file will download first.')) return;
+  dl('lead-ledger-backup-before-delete-'+iso(new Date())+'.json', backupJson(), 'application/json');
+  if(!confirm('Backup downloaded. Delete everything now?')) return;
+  S.days=[]; S.payments=[]; save(); renderDaily(); renderSummary(); toast('Ledger emptied.');
+});
+el('loadEx').addEventListener('click', function(){
+  if(S.days.length && !confirm('Add three example days to the '+S.days.length+' already here?')) return;
+  S.rates.pbo=8; S.rates.pgsx=6; S.rates.ppanel=0; S.rates.gscost=6;
+  [['2026-08-10',40,0,25,10,0,12,'','Bob','NO'],
+   ['2026-08-11',0,35,18,0,8,20,'30','Bob','YES'],
+   ['2026-08-12',5,0,30,2,0,45,'50','Olivia','YES']].forEach(function(x){
+    S.days.push({id:uid(), date:x[0], b:x[1],c:x[2],d:x[3],e:x[4],f:x[5],g:x[6],
+                 pbo:'',pgsx:'',ppanel:'', amt:x[7], by:x[8], settle:x[9]});
+  });
+  save(); renderRates(); renderDaily(); renderSummary();
+  location.hash='#daily';
+  toast('Three example days loaded — 248.00, 190.00 and −280.00.');
+});
+
+/* ================= toast ================= */
+var toastTimer;
+function toast(msg){
+  var t=el('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){ t.classList.remove('on'); },2600);
+}
+
+/* ================= boot ================= */
+S=load();
+if(!S.days.length) S.days.push({id:uid(), date:iso(new Date()), b:'',c:'',d:'',e:'',f:'',g:'',
+                                pbo:'',pgsx:'',ppanel:'', amt:'', by:'Bob', settle:'NO'});
+renderRates(); renderDaily(); renderSummary();
+show(location.hash.slice(1) || 'daily');
+if(!storageOk){
+  el('saved').textContent='NOT SAVING';
+  el('saved').style.color='#ffb3a7';
+  alert('This browser will not let the page save data (private mode, or storage is blocked).\n\n'+
+        'The calculations still work, but nothing will be kept when you close the tab. '+
+        'Use "Download backup" before you leave.');
+}
+window.LEDGER={get S(){return S;}, calcDay:calcDay, summary:summary,
+               allTimeOutstanding:allTimeOutstanding, U:U};
+})();
+</script>
 </body>
 </html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bob &amp; Olivia — lead ledger</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231b2430'/%3E%3Cpath d='M7 11h18M7 16h18M7 21h11' stroke='%23f4c95d' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#1b2430; --ink-2:#41505f; --paper:#fbf9f5; --card:#ffffff;
+  --line:#d9d3c7; --line-2:#eae5db;
+  --bob:#155e34; --bob-bg:#e4f2e8;
+  --oli:#8e2a1f; --oli-bg:#fbe7e3;
+  --neu:#5d6570; --neu-bg:#f0f0ee;
+  --accent:#8a6a12; --accent-bg:#fdf3d8;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font:18px/1.62 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px 96px}
+header{border-bottom:3px solid var(--ink);padding:44px 0 26px;margin-bottom:40px}
+.kicker{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+h1{font-size:clamp(30px,5.4vw,46px);line-height:1.1;margin:12px 0 10px;letter-spacing:-.02em}
+.lede{font-size:20px;color:var(--ink-2);margin:0;max-width:62ch}
+h2{font-size:clamp(21px,3.2vw,27px);margin:56px 0 6px;letter-spacing:-.01em;padding-top:14px;border-top:1px solid var(--line)}
+h2 .num{color:var(--accent);font-variant-numeric:tabular-nums;margin-right:10px}
+h3{font-size:19px;margin:32px 0 8px}
+p{margin:12px 0;max-width:70ch}
+a{color:#0b4f8a}
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+.dl{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:26px 0 4px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;min-height:52px;
+  background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:17px;
+  padding:12px 24px;border-radius:8px;border:2px solid var(--ink);
+}
+.btn:hover{background:#000}
+.btn.alt{background:transparent;color:var(--ink)}
+.btn.alt:hover{background:var(--line-2)}
+.meta{font-size:15px;color:var(--ink-2)}
+
+.tw{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:16px;min-width:560px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line-2);vertical-align:top}
+thead th{background:var(--ink);color:#fff;font-size:14px;letter-spacing:.03em;position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.bob td:last-child{background:var(--bob-bg);color:var(--bob);font-weight:700}
+tr.oli td:last-child{background:var(--oli-bg);color:var(--oli);font-weight:700}
+tr.neu td:last-child{background:var(--neu-bg);color:var(--neu)}
+.tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:13px;font-weight:700;white-space:nowrap}
+.t-bob{background:var(--bob-bg);color:var(--bob)}
+.t-oli{background:var(--oli-bg);color:var(--oli)}
+.t-neu{background:var(--neu-bg);color:var(--neu)}
+
+.rule{
+  background:var(--card);border:2px solid var(--ink);border-radius:10px;
+  padding:22px 24px;margin:22px 0;
+}
+.rule .eq{font-size:clamp(17px,2.6vw,22px);font-weight:700;line-height:1.5;letter-spacing:-.01em}
+.rule .eq .p{color:var(--bob)} .rule .eq .m{color:var(--oli)}
+.rule p{margin:12px 0 0;font-size:17px;color:var(--ink-2)}
+
+.q{background:var(--accent-bg);border:1px solid #e2cf9a;border-left:6px solid var(--accent);
+   border-radius:8px;padding:18px 22px;margin:16px 0}
+.q h3{margin:0 0 6px;font-size:18px}
+.q p{margin:6px 0 0;font-size:17px}
+.q .mine{font-size:16px;color:#6b5410;margin-top:10px}
+
+.note{border-left:4px solid var(--line);padding:2px 0 2px 18px;margin:18px 0;color:var(--ink-2);font-size:17px}
+
+ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:16px 0}
+ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 46px;max-width:70ch}
+ol.steps li::before{
+  content:counter(s);position:absolute;left:0;top:8px;width:30px;height:30px;
+  background:var(--ink);color:#fff;border-radius:50%;display:grid;place-items:center;
+  font-size:15px;font-weight:700
+}
+.calc{font-variant-numeric:tabular-nums;font-size:15px;color:var(--ink-2);white-space:nowrap}
+.net-pos{color:var(--bob);font-weight:700} .net-neg{color:var(--oli);font-weight:700}
+footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);font-size:15px;color:var(--ink-2)}
+@media (max-width:640px){ body{font-size:17px} .wrap{padding:0 16px 72px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Lead ledger · Bob &amp; Olivia</div>
+  <h1>Who owes whom, worked out every day</h1>
+  <p class="lede">Three lead sources, two sets of buyers, one panel. This is the sheet that turns
+  the day's lead counts into a single number: how much moves between Bob and Olivia.</p>
+  <div class="dl">
+    <a class="btn" href="./">Open the live ledger</a>
+    <a class="btn alt" href="lead-ledger-bob-olivia.xlsx" download>Excel version</a>
+    <span class="meta">The ledger runs in the page — nothing to install. The .xlsx is the same
+    model as a file, if you ever need one.</span>
+  </div>
+</header>
+
+<h2><span class="num">1</span>The whole setup, in six lanes</h2>
+<p>Every lead that exists is one of these six. Three of them create a debt between Bob and Olivia.
+The other three don't — both ends of the deal already belong to the same person.</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th>Lead came from</th><th>Sold to</th><th>Who paid for the lead</th>
+  <th>Who collects the sale</th><th>Effect between Bob and Olivia</th>
+</tr></thead>
+<tbody>
+<tr class="bob"><td>Bob's own campaign</td><td>Olivia</td><td>Bob (ad spend)</td><td>Olivia buys it</td><td>Olivia owes Bob</td></tr>
+<tr class="bob"><td>S</td><td>Olivia</td><td>Bob (pays S)</td><td>Olivia buys it</td><td>Olivia owes Bob</td></tr>
+<tr class="neu"><td>GS</td><td>Olivia</td><td>Olivia (pays GS)</td><td>Olivia's own buyer</td><td>nothing</td></tr>
+<tr class="neu"><td>Bob's own campaign</td><td>GLU (Bob's buyer)</td><td>Bob (ad spend)</td><td>Bob, from GLU</td><td>nothing *</td></tr>
+<tr class="neu"><td>S</td><td>GLU (Bob's buyer)</td><td>Bob (pays S)</td><td>Bob, from GLU</td><td>nothing *</td></tr>
+<tr class="oli"><td>GS</td><td>GLU (Bob's buyer)</td><td>Olivia (pays GS)</td><td>Bob, from GLU</td><td>Bob owes Olivia</td></tr>
+</tbody>
+</table>
+</div>
+<p class="meta">* unless you agree a panel fee for Bob using Olivia's panel. There is a rate cell for it,
+set to 0, so it does nothing until you put a number in.</p>
+
+<div class="note">The thing that makes this look complicated is that <strong>who paid for the lead</strong>
+and <strong>who collects the money</strong> come apart. As long as both ends belong to one person,
+nothing moves. A debt only appears when they split — and that happens in exactly three of the six lanes.</div>
+
+<h2><span class="num">2</span>The one rule</h2>
+<div class="rule">
+  <div class="eq">NET &nbsp;=&nbsp; <span class="p">what Olivia owes Bob</span> &nbsp;&minus;&nbsp;
+  <span class="m">what Bob owes Olivia</span> &nbsp;&plusmn;&nbsp; the other cost, if you settle it</div>
+  <p>The NET is always written from Olivia's side. <strong>Positive means Olivia pays Bob.
+  Negative means Bob pays Olivia.</strong> It is the last column of the Daily tab, and it is
+  the only number you have to read.</p>
+</div>
+<p>Daily nets simply add up. Settling every day, every week or once a month gives the identical
+figure, so you can leave it running and settle whenever you like.</p>
+
+<h2><span class="num">3</span>What you type, and what the sheet does</h2>
+<ol class="steps">
+  <li>Put the date in the first column.</li>
+  <li>Put the six lead counts in — how many came from Bob's campaign, from S, from GS, and
+      whether each went to Olivia or to Bob's private buyer. Leave a lane blank if it didn't happen.</li>
+  <li>The three price columns fill themselves from the Rates tab. Type over one only if the
+      price changed that day — the price is never buried inside a formula, so a price change
+      can't quietly rewrite last month's numbers.</li>
+  <li>If there was any other cost, put the amount, who paid it, and YES or NO for whether it
+      settles between you.</li>
+  <li>Read the last column. It says, in words, who pays whom and how much.</li>
+</ol>
+
+<h3>The tabs</h3>
+<div class="tw">
+<table>
+<thead><tr><th>Tab</th><th>What it's for</th></tr></thead>
+<tbody>
+<tr><td><strong>How it works</strong></td><td>The six lanes and the rule, so anyone opening the file can follow it without asking.</td></tr>
+<tr><td><strong>Rates</strong></td><td>Set once. Three rates move money; four more are written down for reference only.</td></tr>
+<tr><td><strong>Daily</strong></td><td>Where you type. 300 rows already carry the formulas. Yellow = type here, grey = worked out for you, green = the answer.</td></tr>
+<tr><td><strong>Summary</strong></td><td>Totals between any two dates, a log of money already transferred, and what is still outstanding.</td></tr>
+<tr><td><strong>Example</strong></td><td>Three worked days with the numbers filled in, so you can check the maths against your own head.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2><span class="num">4</span>Three worked days</h2>
+<p>Using 8.00 per lead from Bob to Olivia, and 6.00 for a GS lead that ends up with Bob's buyer.
+These are the numbers on the Example tab of the file.</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th>Day</th><th>What happened</th><th class="num">Olivia owes Bob</th>
+  <th class="num">Bob owes Olivia</th><th class="num">Other</th><th class="num">NET</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td>10 Aug</td>
+  <td>Bob's campaign running. 40 of his own to Olivia, 10 to GLU. Olivia took 25 from GS, and 12 GS leads went to GLU.</td>
+  <td class="num"><span class="calc">40 &times; 8 =</span> 320.00</td>
+  <td class="num"><span class="calc">12 &times; 6 =</span> 72.00</td>
+  <td class="num">&mdash;</td>
+  <td class="num net-pos">+248.00</td>
+</tr>
+<tr>
+  <td>11 Aug</td>
+  <td>Campaign down. Bob bought from S: 35 to Olivia, 8 to GLU. Olivia took 18 from GS, 20 GS to GLU. Bob paid a 30.00 cost you agreed to settle.</td>
+  <td class="num"><span class="calc">35 &times; 8 =</span> 280.00</td>
+  <td class="num"><span class="calc">20 &times; 6 =</span> 120.00</td>
+  <td class="num">+30.00</td>
+  <td class="num net-pos">+190.00</td>
+</tr>
+<tr>
+  <td>12 Aug</td>
+  <td>Thin day for Bob: 5 to Olivia, 2 to GLU. But 45 GS leads went to GLU. Olivia paid a 50.00 cost you agreed to settle.</td>
+  <td class="num"><span class="calc">5 &times; 8 =</span> 40.00</td>
+  <td class="num"><span class="calc">45 &times; 6 =</span> 270.00</td>
+  <td class="num">&minus;50.00</td>
+  <td class="num net-neg">&minus;280.00</td>
+</tr>
+<tr>
+  <td colspan="5"><strong>Three days together</strong></td>
+  <td class="num net-pos">+158.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Day 3 is the case worth noticing: Bob had a quiet day but pulled 45 GS leads through to his own
+buyer, so the direction flips and <strong>Bob pays Olivia</strong>. Over the three days it nets back to
+Olivia paying Bob 158.00.</p>
+
+<h2><span class="num">5</span>What stops it going wrong</h2>
+<p>The Summary tab carries four checks. Each one rebuilds a figure by a different route than the
+column it is checking, so a broken formula shows up as a number instead of hiding.</p>
+<div class="tw">
+<table>
+<thead><tr><th>Check</th><th>How it is worked out differently</th></tr></thead>
+<tbody>
+<tr><td>1. Lead money</td><td>Multiplies the lead counts by the prices itself, instead of trusting the two money columns.</td></tr>
+<tr><td>2. Other cost</td><td>Re-reads the amount, the payer and the YES/NO, instead of trusting the adjustment column.</td></tr>
+<tr><td>3. The NET column</td><td>Catches a NET cell that has had a number typed straight into it.</td></tr>
+<tr><td>4. Missing price</td><td>Counts days priced at nothing. Should never be anything but zero.</td></tr>
+</tbody>
+</table>
+</div>
+<p>I broke the file six different ways on purpose and every one was caught, with the check reading
+back the exact size of the error.</p>
+<div class="note"><strong>What they cannot see, and I'd rather say it than let you find out later:</strong>
+a lead count typed wrong, leads logged in the wrong lane, the wrong person named as the payer, or a
+price typed wrong on the Rates tab. All four pass every check silently and still move the money — in
+my test, by as much as 64,368. Zero means the formulas are intact. It does not mean the numbers are
+right. Only the panel's own report does that.</div>
+
+<h2><span class="num">6</span>Four things I had to assume — tell me if any is wrong</h2>
+
+<div class="q">
+  <h3>1. What does Bob pay Olivia for a GS lead that goes to his private buyer?</h3>
+  <p>This is the one real gap. Olivia paid GS for that lead and Bob collected the money for it, so
+  something has to come back — but you've never said how much.</p>
+  <p class="mine">I've set it to whatever GS costs Olivia, so it passes straight through at cost with
+  no margin either way. One cell on the Rates tab. If you agreed a different number, or Olivia takes
+  a margin on it, type that instead and everything downstream follows.</p>
+</div>
+
+<div class="q">
+  <h3>2. Does Bob pay anything for using Olivia's panel?</h3>
+  <p>His private-buyer leads are delivered through her panel. If there's a per-lead fee for that, it
+  belongs in the settlement.</p>
+  <p class="mine">I've set the fee to 0, so today it does nothing. If there is one, put the number in
+  and it starts charging on Bob's private-buyer leads automatically.</p>
+</div>
+
+<div class="q">
+  <h3>3. An "other cost" marked YES — does the other person pay it all back, or half?</h3>
+  <p>You said add a column for other costs, who paid, and whether it counts in the final number. What
+  you didn't say is how much of it counts.</p>
+  <p class="mine">I've built it as <strong>paid back in full</strong>: if Bob paid it and it's marked
+  YES, Olivia reimburses the whole amount. If it should be split down the middle instead, say so and
+  it's a one-line change.</p>
+</div>
+
+<div class="q">
+  <h3>4. Is GLU the only private buyer, and is Olivia's price the same from every source?</h3>
+  <p>You said "private buyers" plural but only named GLU. And you said Bob's price to Olivia is always
+  the same — I've taken that to mean the same whether the lead came from his campaign or from S.</p>
+  <p class="mine">All of Bob's private buyers are counted together in one bucket, because for
+  <em>this</em> question it doesn't matter which of them bought — it only matters that the buyer was
+  Bob's and not Olivia's. If you want to see GLU separately from the others, that's a wider sheet and
+  I'd need to know how many there are.</p>
+</div>
+
+<h2><span class="num">7</span>One thing worth watching</h2>
+<p>The Summary tab has a block for <strong>money already transferred</strong>. Log every payment there.
+A ledger like this keeps totalling up what is owed in principle; unless the cash that has actually
+moved is written down next to it, the balance keeps asking for money that has already been paid.
+The "still outstanding" figure at the bottom is the one to act on.</p>
+
+<footer>
+  Built 12 August 2026. Every formula in the file was evaluated with a real Excel engine and matched
+  against a separate exact-arithmetic model of the six lanes — 302 cell checks, all passing, plus six
+  deliberate breakages all caught. Nothing here is a live system; it's a file you own.
+</footer>
+
+</div>
+</body>
+</html>
