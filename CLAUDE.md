@@ -30,12 +30,55 @@ sideways (464 > 390). Caught by the automated overflow check, not by eye.
 ⚠ **The blank starter row is not data.** `loadEx` filters with `isEmptyDay()` before asking to
 confirm — otherwise a fresh ledger asks "add to the 1 already here?" about an empty placeholder.
 
-🛑 **The one real limit, stated on the Rates view: it is one browser.** Not shared with Olivia, gone
-if browser data is cleared. Backup/restore is the mitigation. **If Bob wants both of them typing into
-one live ledger that is a CF Worker + D1** (we have the pattern: `ai-visibility-collect`, `deploy-bot`,
-`fleetview` on the Osanix account) — offered, not built.
+⭐⭐ **2026-08-12, Bob: "OFCOURSE i NEED IT WITH BACKUP. FIX IT!!" → SERVER BUILT, localStorage
+demoted to an offline cache.**
 
-## Verification of the app — `verify_app.py`, 163 checks against the LIVE URL
+## ⭐ THE BACKEND — CF Worker + D1 on the Osanix account
+
+**`https://lead-ledger.fleet-fefsba.workers.dev`** · D1 `lead_ledger`
+(`efbb08d2-6670-49f9-bfbb-05772ad23136`) · source in `worker/`. Deploy with
+`--config ./wrangler.json` and the Osanix global key (see [[wrangler-parent-config-trap]]).
+
+⭐ **The Worker stores bytes and nothing else — the money model lives ONLY in the page.** Deliberate:
+one implementation, so server and browser can never drift. `meta` (days/payments/net) is sent by the
+client purely to label the history list.
+
+Tables: `users(code_hash,name)` · `state(id=1,json,rev,updated_at,updated_by)` ·
+`snapshots(...json)` capped at 300, oldest pruned.
+Routes (all POST, `Authorization: Bearer <code>`): `/api/hello` `/api/load` `/api/save` `/api/history`
+`/api/restore`; `/api/ping` open. CORS locked to the Pages origin + localhost:8788.
+
+⭐ **Two access codes, one per person** — sha-256'd in D1, the code itself never stored. The code IS
+the identity, so there is no "who are you?" prompt and every version is signed. 🛑 **The codes live
+ONLY at `/root/.config/lead-ledger/access.json` (600) and are NOT in the repo** (verified by grep
+over tracked files). Adding a third person = one INSERT.
+
+⭐ **`rev` guard, not last-write-wins.** Every save sends the rev it started from; a mismatch returns
+**409 with the server's state**, and the page shows a three-way choice (download mine / take theirs /
+overwrite). Auto-merging two people's money edits is never attempted.
+⭐ **20s poll while the tab is visible**, plus an immediate poll on `visibilitychange`. Not dirty →
+adopt silently. Dirty → conflict banner.
+⭐ **Restore is just another version**, so an undo can be undone.
+
+🛑 **Four real bugs the browser tests caught — do not regress:**
+1. **`[hidden]` loses to a component `display:` rule.** `.gate{display:grid}` beat the UA's
+   `[hidden]{display:none}`, so after signing in the overlay stayed up and ate every click — the app
+   was unusable. Fixed globally with `[hidden]{display:none !important}`. See
+   [[hidden-attribute-display-trap]].
+2. **A restore was labelled with the balance it REPLACED** (client sent `net` before adopting).
+   The Worker now copies the snapshot's own summary — the bytes are identical, so it is exact.
+3. **Clicking a button blurs the field being typed in, firing `change` AFTER the click handler
+   queued nothing** — the queued save then fired *after* the incoming version was adopted and
+   re-uploaded it as a junk version. Fixed by cancelling `saveTimer`/`retryTimer` inside `adopt()`
+   **and** `if(!dirty && !force) return;` in `pushNow`.
+4. **A stale `change` from a row that has been replaced** could write an old value into the new
+   state. Guarded with `applying` + `document.body.contains(inp)` in `onDayEdit`/`onPayEdit`.
+   ⚠ The blur must happen INSIDE the `applying` guard, before the repaint.
+
+⚠ Test proof for #3 is `len(history) == n+1` after a restore. A count assertion is what exposed a
+save nobody asked for; checking only "the numbers are right" would have missed it entirely.
+
+## Verification of the app — `verify_app.py`, 165 checks against the LIVE URL
 
 Drives the deployed page with Playwright and compares **every displayed number against the same
 exact-`Fraction` model that validated the workbook**, so app and spreadsheet are proved to agree.
@@ -52,6 +95,20 @@ a bug. It only showed up in the typing test because the seeded tests reload (so 
 already correct) — a race that hides itself in 4 of 5 tests.
 ⚠ **Read a downloaded CSV with `newline=""`** or Python's universal newlines eat the `\r\n` and a
 CRLF assertion silently reads one line.
+⚠ **`wait_for_selector("#x[hidden]")` waits for it to be VISIBLE and times out.** Use
+`state="hidden"`. (It only "worked" before because `hidden` was broken — fixing the CSS broke the test.)
+⚠ Seeding a test must clear `leadLedger.v1` before reload, or the page correctly reports a conflict
+between the local copy and the seeded server state.
+
+## `verify_sync.py` — two browsers, two codes, the live Worker
+
+Bob and Olivia in separate contexts. Proves: a wrong code is refused · Bob's 3 days appear in
+Olivia's browser · Olivia's payment reaches Bob's tab on its own (+158 → +58) · a change behind
+Bob's back gives him a conflict banner naming Olivia · "use their version" takes her 41 and drops his
+unsaved 7 · the history lists both names · restoring the oldest version puts the balance back to
++158.00, is labelled with the balance it restored, **adds exactly one version**, and Olivia's tab
+follows it. Wipes the server first — **do not run it once real data is in there.**
+⚠ Cloudflare **403s python-urllib**; the direct API steps use `curl`. See [[cloudflare-403s-python-urllib]].
 
 ⚠ **This is NOT lead-split.** `lead-split` is Tyson & Berry, a **50/50 partnership**
 (`settlement = share of net − collected + paid`, zero-sum). This is Bob & Olivia, a **buy/sell chain**
